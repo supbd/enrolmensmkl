@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <meta charset="utf-8"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body { margin: 0; background: #F5F3FE; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-thumb { background: #C7CDD6; border-radius: 8px; }
+    a { color: #6D5AE0; }
+    a:hover { color: #5A46D6; }
+    select:focus, input:focus, button:focus { outline: 2px solid #6D5AE0; outline-offset: 1px; }
+  </style>
+</helmet>
+
+<div data-screen-label="Dashboard Enrolmen" style="min-height: 100vh; background: #F5F3FE; font-family: 'Public Sans', sans-serif; color: #20242C; padding: 0 0 60px;">
+
+  <!-- App bar -->
+  <div style="background: linear-gradient(120deg, #6D5AE0, #8A5CF0 55%, #E0508A); padding: 16px 32px; box-shadow: 0 4px 16px rgba(109,90,224,0.18);">
+    <div style="max-width: 1440px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 42px; height: 42px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">
+          <img src="./assets/Lencana_SMK_Lunas_small.png" alt="Lencana SMK Lunas" style="width: 30px; height: 36px;"/>
+        </div>
+        <div>
+          <div style="font-family: 'Google Sans', 'Manrope', sans-serif; font-weight: 700; font-size: 17px; color: #fff; letter-spacing: -0.01em;">Enrolmen Murid</div>
+          <div style="font-size: 12.5px; color: rgba(255,255,255,0.85);">SMK Lunas — Admin Console</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <select value="{{ selectedMonth }}" onChange="{{ onMonthChange }}" style="background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35); border-radius: 999px; padding: 7px 16px; font-size: 12.5px; color: #fff; font-weight: 700; cursor: pointer;">
+          <sc-for list="{{ monthOptions }}" as="m" hint-placeholder-count="12">
+            <option value="{{ m.code }}" style="color: #20242C;">{{ m.label }}</option>
+          </sc-for>
+        </select>
+        <a href="./Upload.dc.html" style="background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.35); border-radius: 999px; padding: 8px 18px; font-size: 13px; color: #fff; font-weight: 700; text-decoration: none;">Upload Data Murid</a>
+        <a href="./Induk.dc.html" style="background: #fff; border: 1px solid #fff; border-radius: 999px; padding: 8px 18px; font-size: 13px; color: #6D5AE0; font-weight: 700; text-decoration: none;">Laporan Induk (Cetak)</a>
+      </div>
+    </div>
+  </div>
+
+  <div style="max-width: 1440px; margin: 0 auto; padding: 24px 32px 0;">
+    <div style="font-size: 12.5px; color: #8A80B0; margin-bottom: 18px;">Data bagi bulan {{ selectedMonthLabel }} 2026 &nbsp;•&nbsp; <span style="color:#B0A8D0;">{{ dataSourceNote }}</span></div>
+
+    <sc-if value="{{ showNoUploadWarning }}" hint-placeholder-val="{{ false }}">
+      <div style="background: #FFFBEB; border: 1px solid #FDE68A; color: #8A5A00; border-radius: 10px; padding: 12px 16px; font-size: 13px; font-weight: 600; margin-bottom: 20px;">
+        Tiada data dimuat naik untuk bulan {{ selectedMonthLabel }} — dashboard menunjukkan data contoh sedia ada. <a href="./Upload.dc.html" style="color: #8A5A00; text-decoration: underline; font-weight: 700;">Muat naik fail bulan ini</a>
+      </div>
+    </sc-if>
+
+    <!-- KPI cards -->
+    <div style="margin-bottom: 20px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;">
+      <sc-for list="{{ kpis }}" as="kpi" hint-placeholder-count="8">
+        <div style="background: {{ kpi.tint }}; border: 1px solid {{ kpi.border }}; border-radius: 14px; padding: 16px 18px; box-shadow: 0 2px 10px rgba(32,20,80,0.05);">
+          <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+            <div style="width: 10px; height: 10px; border-radius: 50%; background: {{ kpi.accent }};"></div>
+            <div style="font-size: 12.5px; color: #5F5578; font-weight: 600;">{{ kpi.label }}</div>
+          </div>
+          <div style="font-family: 'Google Sans', 'Manrope', sans-serif; font-size: 28px; font-weight: 800; color: {{ kpi.accent }}; line-height: 1;">{{ kpi.value }}</div>
+        </div>
+      </sc-for>
+    </div>
+
+    <!-- Filters -->
+    <div style="margin-bottom: 20px; background: #fff; border: 1px solid #EAE5FA; border-radius: 14px; padding: 6px 20px 18px; box-shadow: 0 2px 10px rgba(32,20,80,0.05);">
+      <div style="display: flex; gap: 10px; padding: 12px 0 16px; margin-bottom: 16px; border-bottom: 1px solid #F0EDFB;">
+        <button onClick="{{ selectArus }}" style="{{ arusBtnStyle }}">Arus Perdana</button>
+        <button onClick="{{ selectPeralihan }}" style="{{ peralihanBtnStyle }}">Peralihan</button>
+        <button onClick="{{ selectPpki }}" style="{{ ppkiBtnStyle }}">PPKI</button>
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <div style="font-size: 12.5px; color: #5F5578; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;">Penapis</div>
+        <button onClick="{{ resetFilters }}" style="background: none; border: none; color: #6D5AE0; font-size: 12.5px; font-weight: 700; cursor: pointer; padding: 4px 6px;">Reset semua</button>
+      </div>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+        <sc-if value="{{ showTingkatanFilter }}" hint-placeholder-val="{{ true }}">
+          <select value="{{ tingkatan }}" onChange="{{ onTingkatanChange }}" style="padding: 9px 12px; border-radius: 8px; border: 1px solid #DCD4F7; font-size: 13px; min-width: 130px; background: #fff; color: #333A45;">
+            <option value="">Semua Tingkatan</option>
+            <option value="1">Tingkatan 1</option>
+            <option value="2">Tingkatan 2</option>
+            <option value="3">Tingkatan 3</option>
+            <option value="4">Tingkatan 4</option>
+            <option value="5">Tingkatan 5</option>
+          </select>
+        </sc-if>
+
+        <select value="{{ kelas }}" onChange="{{ onKelasChange }}" style="padding: 9px 12px; border-radius: 8px; border: 1px solid #DCD4F7; font-size: 13px; min-width: 140px; background: #fff; color: #333A45;">
+          <option value="">Semua Kelas</option>
+          <sc-for list="{{ kelasOptions }}" as="k" hint-placeholder-count="5">
+            <option value="{{ k }}">{{ k }}</option>
+          </sc-for>
+        </select>
+
+        <select value="{{ sesi }}" onChange="{{ onSesiChange }}" style="padding: 9px 12px; border-radius: 8px; border: 1px solid #DCD4F7; font-size: 13px; min-width: 120px; background: #fff; color: #333A45;">
+          <option value="">Semua Sesi</option>
+          <option value="Pagi">Pagi</option>
+          <option value="Petang">Petang</option>
+        </select>
+
+        <select value="{{ kaum }}" onChange="{{ onKaumChange }}" style="padding: 9px 12px; border-radius: 8px; border: 1px solid #DCD4F7; font-size: 13px; min-width: 120px; background: #fff; color: #333A45;">
+          <option value="">Semua Kaum</option>
+          <option value="Melayu">Melayu</option>
+          <option value="Cina">Cina</option>
+          <option value="India">India</option>
+          <option value="Lain-lain">Lain-lain</option>
+        </select>
+
+        <select value="{{ jantina }}" onChange="{{ onJantinaChange }}" style="padding: 9px 12px; border-radius: 8px; border: 1px solid #DCD4F7; font-size: 13px; min-width: 120px; background: #fff; color: #333A45;">
+          <option value="">Semua Jantina</option>
+          <option value="L">Lelaki</option>
+          <option value="P">Perempuan</option>
+        </select>
+
+        <button onClick="{{ onMbwnToggle }}" style="{{ mbwnBtnStyle }}">MBWN sahaja</button>
+
+        <input type="text" value="{{ search }}" onChange="{{ onSearchChange }}" placeholder="Cari nama murid…" style="padding: 9px 14px; border-radius: 8px; border: 1px solid #DCD4F7; font-size: 13px; min-width: 220px; background: #F8F6FE; flex: 1;"/>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div style="margin-bottom: 20px; display: grid; grid-template-columns: 1.1fr 1fr; gap: 14px;">
+
+      <div style="background: #fff; border: 1px solid #EAE5FA; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 10px rgba(32,20,80,0.05);">
+        <div style="font-size: 12.5px; color: #5F5578; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 16px;">Enrolmen mengikut Tingkatan</div>
+        <sc-for list="{{ byTingkatan }}" as="b" hint-placeholder-count="7">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+            <div style="width: 90px; font-size: 13px; color: #333A45; font-weight: 600; flex-shrink: 0;">{{ b.label }}</div>
+            <div style="flex: 1; height: 10px; background: #EDEFF3; border-radius: 999px; overflow: hidden;">
+              <div style="height: 100%; border-radius: 999px; background: linear-gradient(90deg, #6D5AE0, #8A5CF0); width: {{ b.pct }}%;"></div>
+            </div>
+            <div style="width: 40px; text-align: right; font-size: 13px; font-weight: 700; color: #131519;">{{ b.count }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background: #fff; border: 1px solid #EAE5FA; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 10px rgba(32,20,80,0.05);">
+        <div style="font-size: 12.5px; color: #5F5578; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 16px;">Enrolmen mengikut Kaum</div>
+        <sc-for list="{{ byKaum }}" as="b" hint-placeholder-count="4">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+            <div style="width: 90px; font-size: 13px; color: #333A45; font-weight: 600; flex-shrink: 0;">{{ b.label }}</div>
+            <div style="flex: 1; height: 10px; background: #EDEFF3; border-radius: 999px; overflow: hidden;">
+              <div style="height: 100%; border-radius: 999px; background: {{ b.color }}; width: {{ b.pct }}%;"></div>
+            </div>
+            <div style="width: 40px; text-align: right; font-size: 13px; font-weight: 700; color: #131519;">{{ b.count }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background: #fff; border: 1px solid #EAE5FA; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 10px rgba(32,20,80,0.05);">
+        <div style="font-size: 12.5px; color: #5F5578; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 16px;">Enrolmen mengikut Jantina</div>
+        <sc-for list="{{ byJantina }}" as="b" hint-placeholder-count="2">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+            <div style="width: 90px; font-size: 13px; color: #333A45; font-weight: 600; flex-shrink: 0;">{{ b.label }}</div>
+            <div style="flex: 1; height: 10px; background: #EDEFF3; border-radius: 999px; overflow: hidden;">
+              <div style="height: 100%; border-radius: 999px; background: {{ b.color }}; width: {{ b.pct }}%;"></div>
+            </div>
+            <div style="width: 40px; text-align: right; font-size: 13px; font-weight: 700; color: #131519;">{{ b.count }}</div>
+          </div>
+        </sc-for>
+        <div style="font-size: 12.5px; color: #5F5578; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; margin: 18px 0 16px;">Enrolmen mengikut Sesi</div>
+        <sc-for list="{{ bySesi }}" as="b" hint-placeholder-count="2">
+          <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
+            <div style="width: 90px; font-size: 13px; color: #333A45; font-weight: 600; flex-shrink: 0;">{{ b.label }}</div>
+            <div style="flex: 1; height: 10px; background: #EDEFF3; border-radius: 999px; overflow: hidden;">
+              <div style="height: 100%; border-radius: 999px; background: {{ b.color }}; width: {{ b.pct }}%;"></div>
+            </div>
+            <div style="width: 40px; text-align: right; font-size: 13px; font-weight: 700; color: #131519;">{{ b.count }}</div>
+          </div>
+        </sc-for>
+      </div>
+
+      <div style="background: #fff; border: 1px solid #EAE5FA; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 10px rgba(32,20,80,0.05);">
+        <div style="font-size: 12.5px; color: #5F5578; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 16px;">Enrolmen mengikut Kelas</div>
+        <div style="max-height: 300px; overflow-y: auto; padding-right: 6px;">
+          <sc-for list="{{ byKelas }}" as="b" hint-placeholder-count="10">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 9px;">
+              <div style="width: 90px; font-size: 12px; color: #333A45; font-weight: 600; flex-shrink: 0;">{{ b.label }}</div>
+              <div style="flex: 1; height: 9px; background: #EDEFF3; border-radius: 999px; overflow: hidden;">
+                <div style="height: 100%; border-radius: 999px; background: linear-gradient(90deg, #6D5AE0, #E0508A); width: {{ b.pct }}%;"></div>
+              </div>
+              <div style="width: 32px; text-align: right; font-size: 12px; font-weight: 700; color: #131519;">{{ b.count }}</div>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Table -->
+    <div style="margin-bottom: 20px; background: #fff; border: 1px solid #EAE5FA; border-radius: 14px; padding: 18px 20px 14px; box-shadow: 0 2px 10px rgba(32,20,80,0.05);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+        <div style="font-size: 12.5px; color: #5F5578; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;">Senarai Murid ({{ total }})</div>
+        <div style="font-size: 13px; color: #5F5578;">Menunjukkan {{ rangeStart }}–{{ rangeEnd }} drpd {{ total }}</div>
+      </div>
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr style="border-bottom: 1px solid #EAE5FA;">
+              <th style="text-align: left; padding: 9px 10px; color: #5F5578; font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em;">Nama</th>
+              <th style="text-align: left; padding: 9px 10px; color: #5F5578; font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em;">Tingkatan</th>
+              <th style="text-align: left; padding: 9px 10px; color: #5F5578; font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em;">Kelas</th>
+              <th style="text-align: left; padding: 9px 10px; color: #5F5578; font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em;">Jantina</th>
+              <th style="text-align: left; padding: 9px 10px; color: #5F5578; font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em;">Kaum</th>
+              <th style="text-align: left; padding: 9px 10px; color: #5F5578; font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em;">MBWN</th>
+              <th style="text-align: left; padding: 9px 10px; color: #5F5578; font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em;">PPKI</th>
+              <th style="text-align: left; padding: 9px 10px; color: #5F5578; font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em;">Sesi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ pageRows }}" as="s" hint-placeholder-count="10">
+              <tr style="border-bottom: 1px solid #F0F1F4; background: {{ s.rowBg }};">
+                <td style="padding: 9px 10px; font-weight: 600; color: #131519;">{{ s.nama }}</td>
+                <td style="padding: 9px 10px; color: #4A505A;">{{ s.tingkatanLabel }}</td>
+                <td style="padding: 9px 10px; color: #4A505A;">{{ s.kelas }}</td>
+                <td style="padding: 9px 10px; color: #4A505A;">{{ s.jantinaLabel }}</td>
+                <td style="padding: 9px 10px; color: #4A505A;">{{ s.kaum }}</td>
+                <td style="padding: 9px 10px;"><span style="{{ s.mbwnBadgeStyle }}">{{ s.mbwnLabel }}</span></td>
+                <td style="padding: 9px 10px;"><span style="{{ s.ppkiBadgeStyle }}">{{ s.ppkiLabel }}</span></td>
+                <td style="padding: 9px 10px; color: #4A505A;">{{ s.sesi }}</td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px; margin-top: 14px;">
+        <button onClick="{{ prevPage }}" style="padding: 8px 14px; border-radius: 8px; border: 1px solid #DCD4F7; background: #fff; color: #333A45; font-size: 13px; font-weight: 600; cursor: pointer;">Sebelum</button>
+        <div style="font-size: 13px; color: #5F5578;">Muka {{ page }} / {{ totalPages }}</div>
+        <button onClick="{{ nextPage }}" style="padding: 8px 14px; border-radius: 8px; border: 1px solid #DCD4F7; background: #fff; color: #333A45; font-size: 13px; font-weight: 600; cursor: pointer;">Seterus</button>
+      </div>
+    </div>
+
+    <!-- Perbandingan iDME -->
+    <div style="background: #fff; border: 1px solid #EAE5FA; border-radius: 14px; padding: 18px 20px; box-shadow: 0 2px 10px rgba(32,20,80,0.05); position: relative; overflow: hidden;">
+      <div style="position: absolute; top: 0; left: 0; bottom: 0; width: 4px; background: #F59E0B;"></div>
+      <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 6px;">
+        <div style="font-size: 12.5px; color: #5F5578; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;">Perbandingan iDME</div>
+        <div style="background: #FEF6E7; border: 1px solid #F3DEB0; color: #8A5A00; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 6px;">Untuk semakan dalaman sahaja — bukan laporan rasmi</div>
+      </div>
+      <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+        <div style="font-size: 13px; color: #5F5578;">Bandingkan jumlah murid ikut data penyelia (auto) dengan jumlah dalam iDME (isi manual) untuk kesan perbezaan.</div>
+        <div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0;">
+          <div style="font-size: 12px; color: #9088AE;">{{ idmeSavedLabel }}</div>
+          <label style="background: linear-gradient(120deg, #6D5AE0, #8A5CF0); color: #fff; border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap;">
+            Muat naik fail iDME (.xlsx)
+            <input type="file" accept=".xlsx" onChange="{{ onIdmeFileSelected }}" style="display: none;"/>
+          </label>
+          <button onClick="{{ resetIdme }}" style="background: none; border: 1px solid #DCD4F7; border-radius: 8px; color: #5F5578; font-size: 12px; font-weight: 700; cursor: pointer; padding: 6px 10px;">Reset iDME</button>
+        </div>
+      </div>
+      <sc-if value="{{ idmeParseError }}" hint-placeholder-val="{{ false }}">
+        <div style="background: #FDECF1; border: 1px solid #F5C2D6; color: #A61E4D; font-size: 13px; padding: 10px 14px; border-radius: 8px; margin-bottom: 16px;">{{ idmeParseError }}</div>
+      </sc-if>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 18px;">
+        <div style="background: #F8F6FE; border: 1px solid #EAE5FA; border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 12px; color: #5F5578; font-weight: 700;">Jumlah Penyelia</div>
+          <div style="font-family: 'Google Sans', 'Manrope', sans-serif; font-size: 22px; font-weight: 700; color: #131519; margin-top: 4px;">{{ idmeTotalPenyelia }}</div>
+        </div>
+        <div style="background: #F8F6FE; border: 1px solid #EAE5FA; border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 12px; color: #5F5578; font-weight: 700;">Jumlah iDME</div>
+          <div style="font-family: 'Google Sans', 'Manrope', sans-serif; font-size: 22px; font-weight: 700; color: #131519; margin-top: 4px;">{{ idmeTotalIdme }}</div>
+        </div>
+        <div style="background: {{ idmeSummaryBg }}; border: 1px solid {{ idmeSummaryBorder }}; border-radius: 8px; padding: 14px 16px;">
+          <div style="font-size: 12px; color: #5F5578; font-weight: 700;">Jumlah Beza / Kategori Tak Sepadan</div>
+          <div style="font-family: 'Google Sans', 'Manrope', sans-serif; font-size: 22px; font-weight: 700; color: {{ idmeSummaryColor }}; margin-top: 4px;">{{ idmeTotalBeza }} &nbsp;/&nbsp; {{ idmeMismatchCount }}</div>
+        </div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr style="border-bottom: 1px solid #EAE5FA;">
+              <th style="text-align: left; padding: 9px 10px; color: #5F5578; font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em;">Kategori</th>
+              <th style="text-align: left; padding: 9px 10px; color: #5F5578; font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em;">Jumlah Penyelia (auto)</th>
+              <th style="text-align: left; padding: 9px 10px; color: #5F5578; font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em;">Jumlah iDME (isi manual)</th>
+              <th style="text-align: left; padding: 9px 10px; color: #5F5578; font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em;">Beza</th>
+              <th style="text-align: left; padding: 9px 10px; color: #5F5578; font-weight: 700; font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.03em;">Senarai murid punca beza (jika ada)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <sc-for list="{{ idmeRows }}" as="row" hint-placeholder-count="7">
+              <tr style="border-bottom: 1px solid #F0F1F4; background: {{ row.rowBg }};">
+                <td style="padding: 9px 10px; font-weight: 700; color: #131519;">{{ row.label }}</td>
+                <td style="padding: 9px 10px; color: #4A505A;">{{ row.penyelia }}</td>
+                <td style="padding: 6px 10px;">
+                  <input type="number" value="{{ row.idmeValue }}" onChange="{{ row.onIdmeChange }}" style="width: 90px; padding: 7px 10px; border-radius: 8px; border: 1px solid #DCD4F7; font-size: 13px; background: #fff;"/>
+                </td>
+                <td style="padding: 9px 10px; font-weight: 800; color: {{ row.bezaColor }};">{{ row.beza }}</td>
+                <td style="padding: 6px 10px;">
+                  <input type="text" value="{{ row.note }}" onChange="{{ row.onNoteChange }}" placeholder="cth: nama murid yang tak sepadan…" style="width: 100%; min-width: 220px; padding: 7px 10px; border-radius: 8px; border: 1px solid #DCD4F7; font-size: 13px; background: #fff;"/>
+                </td>
+              </tr>
+            </sc-for>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    students: [],
+    baseStudents: [],
+    selectedMonth: '04',
+    kategori: 'ARUS',
+    tingkatan: '',
+    kelas: '',
+    sesi: '',
+    kaum: '',
+    jantina: '',
+    mbwnOnly: false,
+    search: '',
+    page: 1,
+    idme: {},
+    idmeNotes: {},
+    idmeSavedAt: null,
+    idmeByMonth: {},
+    idmeParseError: '',
+  };
+
+  MONTHS = [
+    { code: '01', label: 'Januari' },
+    { code: '02', label: 'Februari' },
+    { code: '03', label: 'Mac' },
+    { code: '04', label: 'April' },
+    { code: '05', label: 'Mei' },
+    { code: '06', label: 'Jun' },
+    { code: '07', label: 'Julai' },
+    { code: '08', label: 'Ogos' },
+    { code: '09', label: 'September' },
+    { code: '10', label: 'Oktober' },
+    { code: '11', label: 'November' },
+    { code: '12', label: 'Disember' },
+  ];
+
+  IDME_STORAGE_KEY = 'idme-comparison-v1';
+  UPLOAD_OVERRIDES_KEY = 'uploaded-students-v2';
+  UPLOAD_OVERRIDES_KEY_LEGACY = 'uploaded-students-v1';
+  SELECTED_MONTH_KEY = 'dashboard-month-v1';
+
+  loadOverridesByMonth() {
+    try {
+      const raw = localStorage.getItem(this.UPLOAD_OVERRIDES_KEY);
+      if (raw) return JSON.parse(raw);
+      const legacy = localStorage.getItem(this.UPLOAD_OVERRIDES_KEY_LEGACY);
+      if (legacy) {
+        const data = JSON.parse(legacy);
+        if (data && Object.keys(data).length) return { '04': data };
+      }
+    } catch (e) {}
+    return {};
+  }
+
+  loadSelectedMonth() {
+    try {
+      return localStorage.getItem(this.SELECTED_MONTH_KEY) || '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  saveSelectedMonth(month) {
+    try { localStorage.setItem(this.SELECTED_MONTH_KEY, month); } catch (e) {}
+  }
+
+  // ---------- iDME .xlsx parsing (client-side, no deps) ----------
+
+  async unzip(blob) {
+    const buf = new Uint8Array(await blob.arrayBuffer());
+    const dv = new DataView(buf.buffer);
+    let eocd = -1;
+    for (let i = buf.length - 22; i >= 0; i--) {
+      if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+    }
+    if (eocd < 0) throw new Error('Fail bukan format .xlsx yang sah.');
+    const cdOffset = dv.getUint32(eocd + 16, true);
+    const cdCount = dv.getUint16(eocd + 10, true);
+    let p = cdOffset;
+    const entries = {};
+    for (let i = 0; i < cdCount; i++) {
+      const method = dv.getUint16(p + 10, true);
+      const compSize = dv.getUint32(p + 20, true);
+      const nameLen = dv.getUint16(p + 28, true);
+      const extraLen = dv.getUint16(p + 30, true);
+      const commentLen = dv.getUint16(p + 32, true);
+      const lhOffset = dv.getUint32(p + 42, true);
+      const name = new TextDecoder().decode(buf.slice(p + 46, p + 46 + nameLen));
+      entries[name] = { method, compSize, lhOffset };
+      p += 46 + nameLen + extraLen + commentLen;
+    }
+    const result = {};
+    for (const [name, e] of Object.entries(entries)) {
+      const lp = e.lhOffset;
+      const lNameLen = dv.getUint16(lp + 26, true);
+      const lExtraLen = dv.getUint16(lp + 28, true);
+      const dataStart = lp + 30 + lNameLen + lExtraLen;
+      const compData = buf.slice(dataStart, dataStart + e.compSize);
+      let outData;
+      if (e.method === 0) {
+        outData = compData;
+      } else if (e.method === 8) {
+        const ds = new DecompressionStream('deflate-raw');
+        const writer = ds.writable.getWriter();
+        writer.write(compData);
+        writer.close();
+        const chunks = [];
+        const reader = ds.readable.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+        }
+        const total = chunks.reduce((a, c) => a + c.length, 0);
+        outData = new Uint8Array(total);
+        let off = 0;
+        for (const c of chunks) { outData.set(c, off); off += c.length; }
+      } else {
+        continue;
+      }
+      result[name] = outData;
+    }
+    return result;
+  }
+
+  colToIndex(col) {
+    let n = 0;
+    for (let i = 0; i < col.length; i++) n = n * 26 + (col.charCodeAt(i) - 64);
+    return n - 1;
+  }
+
+  parseSheetXml(xmlStr, sharedStrings) {
+    const doc = new DOMParser().parseFromString(xmlStr, 'text/xml');
+    const rows = [];
+    const rowEls = doc.getElementsByTagName('row');
+    for (const rowEl of rowEls) {
+      const rIdx = parseInt(rowEl.getAttribute('r'), 10) - 1;
+      const cells = rowEl.getElementsByTagName('c');
+      const row = [];
+      for (const c of cells) {
+        const ref = c.getAttribute('r');
+        const colLetters = ref.match(/[A-Z]+/)[0];
+        const idx = this.colToIndex(colLetters);
+        const t = c.getAttribute('t');
+        const vEl = c.getElementsByTagName('v')[0];
+        let val = vEl ? vEl.textContent : '';
+        if (t === 's') {
+          val = sharedStrings[parseInt(val, 10)] || '';
+        } else if (t === 'inlineStr') {
+          const isEl = c.getElementsByTagName('is')[0];
+          val = isEl ? isEl.textContent : '';
+        }
+        row[idx] = val;
+      }
+      rows[rIdx] = row;
+    }
+    return rows;
+  }
+
+  parseSharedStrings(xmlStr) {
+    if (!xmlStr) return [];
+    const doc = new DOMParser().parseFromString(xmlStr, 'text/xml');
+    const siEls = doc.getElementsByTagName('si');
+    const arr = [];
+    for (const si of siEls) {
+      const tEls = si.getElementsByTagName('t');
+      let text = '';
+      for (const t of tEls) text += t.textContent;
+      arr.push(text);
+    }
+    return arr;
+  }
+
+  parseWorkbookRels(xmlStr) {
+    const doc = new DOMParser().parseFromString(xmlStr, 'text/xml');
+    const rels = doc.getElementsByTagName('Relationship');
+    const map = {};
+    for (const r of rels) map[r.getAttribute('Id')] = r.getAttribute('Target');
+    return map;
+  }
+
+  parseWorkbookSheetRIds(xmlStr) {
+    const doc = new DOMParser().parseFromString(xmlStr, 'text/xml');
+    const sheetEls = doc.getElementsByTagName('sheet');
+    return Array.from(sheetEls).map((s) => ({ name: s.getAttribute('name'), rid: s.getAttribute('r:id') }));
+  }
+
+  async loadWorkbook(blob) {
+    const zip = await this.unzip(blob);
+    const dec = new TextDecoder();
+    const sstXml = zip['xl/sharedStrings.xml'] ? dec.decode(zip['xl/sharedStrings.xml']) : '';
+    const sst = this.parseSharedStrings(sstXml);
+    const wbXml = dec.decode(zip['xl/workbook.xml']);
+    const relsXml = dec.decode(zip['xl/_rels/workbook.xml.rels']);
+    const sheetMeta = this.parseWorkbookSheetRIds(wbXml);
+    const relMap = this.parseWorkbookRels(relsXml);
+    const sheets = {};
+    for (const { name, rid } of sheetMeta) {
+      const target = relMap[rid];
+      const fullPath = 'xl/' + target;
+      if (!zip[fullPath]) continue;
+      const xml = dec.decode(zip[fullPath]);
+      sheets[name] = this.parseSheetXml(xml, sst);
+    }
+    return sheets;
+  }
+
+  normHeader(cell) {
+    return (cell || '').toString().trim().toUpperCase().replace(/\s*\/\s*/g, '/').replace(/\s+/g, ' ');
+  }
+
+  deriveIdmeTingkatan(raw, aliran, jenisKelas) {
+    const t = (raw || '').toString().trim().toUpperCase();
+    const a = (aliran || '').toString().toUpperCase();
+    const j = (jenisKelas || '').toString().toUpperCase();
+    if (t === 'PPKI' || /KHAS/.test(a) || /KHAS/.test(j)) return 'PPKI';
+    if (t.startsWith('PERALIHAN')) return 'PERALIHAN';
+    const m = t.match(/(\d)/);
+    if (m) return m[1];
+    return '';
+  }
+
+  computeIdmeCountsFromSheets(sheets) {
+    const tingkatanOrder = ['PERALIHAN', '1', '2', '3', '4', '5', 'PPKI'];
+    const counts = {};
+    tingkatanOrder.forEach((t) => { counts[t] = 0; });
+    let found = false;
+    for (const rows of Object.values(sheets)) {
+      let headerRowIdx = -1;
+      let tingkatanCol = -1, aliranCol = -1, jenisKelasCol = -1;
+      for (let r = 0; r < rows.length; r++) {
+        const row = rows[r] || [];
+        let hasName = false;
+        for (let c = 0; c < row.length; c++) {
+          if (this.normHeader(row[c]) === 'NAMA') hasName = true;
+        }
+        if (hasName) {
+          headerRowIdx = r;
+          for (let c = 0; c < row.length; c++) {
+            const h = this.normHeader(row[c]);
+            if (h === 'TAHUN/TINGKATAN') tingkatanCol = c;
+            if (h === 'KETERANGAN ALIRAN') aliranCol = c;
+            if (h === 'JENIS KELAS') jenisKelasCol = c;
+          }
+          break;
+        }
+      }
+      if (headerRowIdx === -1 || tingkatanCol === -1) continue;
+      found = true;
+      for (let r = headerRowIdx + 1; r < rows.length; r++) {
+        const row = rows[r] || [];
+        const raw = row[tingkatanCol];
+        if (!raw) continue;
+        const t = this.deriveIdmeTingkatan(raw, aliranCol >= 0 ? row[aliranCol] : '', jenisKelasCol >= 0 ? row[jenisKelasCol] : '');
+        if (t && counts[t] !== undefined) counts[t]++;
+      }
+    }
+    return found ? counts : null;
+  }
+
+  onIdmeFileSelected = async (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    this.setState({ idmeParseError: '' });
+    try {
+      const sheets = await this.loadWorkbook(file);
+      const counts = this.computeIdmeCountsFromSheets(sheets);
+      if (!counts) {
+        this.setState({ idmeParseError: 'Tiada lajur "TAHUN / TINGKATAN" dikesan dalam fail ini. Sila semak format fail iDME.' });
+        return;
+      }
+      this.setState({ idme: counts, idmeParseError: '' });
+      this.saveIdmeForMonth(this.state.selectedMonth, counts, this.state.idmeNotes);
+    } catch (err) {
+      this.setState({ idmeParseError: 'Ralat membaca fail: ' + err.message });
+    }
+  };
+
+  applyUploadOverrides(baseStudents, overrides) {
+    const overrideKelas = Object.keys(overrides);
+    if (!overrideKelas.length) return baseStudents;
+    let result = baseStudents.filter((s) => !overrideKelas.includes(s.kelas));
+    let nextId = Math.max(0, ...baseStudents.map((s) => s.id || 0)) + 1;
+    overrideKelas.forEach((kelas) => {
+      const ov = overrides[kelas];
+      (ov.students || []).forEach((st) => {
+        result.push({
+          id: nextId++,
+          nama: st.nama,
+          tingkatan: ov.tingkatan,
+          kelas,
+          jantina: st.jantina,
+          kaum: st.kaum,
+          mbwn: !!st.mbwn,
+          ppki: !!ov.ppki,
+          sesi: 'Pagi',
+        });
+      });
+    });
+    return result;
+  }
+
+  loadIdmeByMonth() {
+    try {
+      const raw = localStorage.getItem(this.IDME_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  saveIdmeForMonth(month, idme, idmeNotes) {
+    try {
+      const savedAt = new Date().toISOString();
+      const idmeByMonth = { ...this.state.idmeByMonth, [month]: { idme, idmeNotes, savedAt } };
+      localStorage.setItem(this.IDME_STORAGE_KEY, JSON.stringify(idmeByMonth));
+      this.setState({ idmeByMonth, idmeSavedAt: savedAt });
+    } catch (e) {
+      // storage unavailable — ignore
+    }
+  }
+
+  componentDidMount() {
+    import('./data/students.js').then((mod) => {
+      const overridesByMonth = this.loadOverridesByMonth();
+      let selectedMonth = this.loadSelectedMonth();
+      if (!selectedMonth) {
+        let latest = null, latestTime = 0;
+        Object.entries(overridesByMonth).forEach(([code, overrides]) => {
+          Object.values(overrides).forEach((entry) => {
+            const t = entry.savedAt ? new Date(entry.savedAt).getTime() : 0;
+            if (t > latestTime) { latestTime = t; latest = code; }
+          });
+        });
+        selectedMonth = latest || '04';
+      }
+      const overrides = overridesByMonth[selectedMonth] || {};
+      const students = this.applyUploadOverrides(mod.STUDENTS, overrides);
+      const tingkatanOrder = ['PERALIHAN', '1', '2', '3', '4', '5', 'PPKI'];
+      const counts = {};
+      tingkatanOrder.forEach((t) => {
+        counts[t] = students.filter((s) => s.tingkatan === t).length;
+      });
+      const idmeByMonth = this.loadIdmeByMonth();
+      const savedForMonth = idmeByMonth[selectedMonth];
+      this.setState({
+        baseStudents: mod.STUDENTS,
+        overridesByMonth,
+        selectedMonth,
+        students,
+        idmeByMonth,
+        idme: savedForMonth && savedForMonth.idme ? { ...counts, ...savedForMonth.idme } : counts,
+        idmeNotes: savedForMonth && savedForMonth.idmeNotes ? savedForMonth.idmeNotes : {},
+        idmeSavedAt: savedForMonth ? savedForMonth.savedAt : null,
+      });
+    });
+  }
+
+  onMonthChange = (e) => {
+    const selectedMonth = e.target.value;
+    const overrides = this.state.overridesByMonth[selectedMonth] || {};
+    const students = this.applyUploadOverrides(this.state.baseStudents, overrides);
+    const tingkatanOrder = ['PERALIHAN', '1', '2', '3', '4', '5', 'PPKI'];
+    const counts = {};
+    tingkatanOrder.forEach((t) => {
+      counts[t] = students.filter((s) => s.tingkatan === t).length;
+    });
+    const savedForMonth = this.state.idmeByMonth[selectedMonth];
+    this.saveSelectedMonth(selectedMonth);
+    this.setState({
+      selectedMonth,
+      students,
+      page: 1,
+      idme: savedForMonth && savedForMonth.idme ? { ...counts, ...savedForMonth.idme } : counts,
+      idmeNotes: savedForMonth && savedForMonth.idmeNotes ? savedForMonth.idmeNotes : {},
+      idmeSavedAt: savedForMonth ? savedForMonth.savedAt : null,
+    });
+  };
+
+  onIdmeChange = (kategori, value) => {
+    const n = value === '' ? 0 : parseInt(value, 10) || 0;
+    this.setState((s) => {
+      const idme = { ...s.idme, [kategori]: n };
+      this.saveIdmeForMonth(s.selectedMonth, idme, s.idmeNotes);
+      return { idme };
+    });
+  };
+
+  onIdmeNoteChange = (kategori, value) => {
+    this.setState((s) => {
+      const idmeNotes = { ...s.idmeNotes, [kategori]: value };
+      this.saveIdmeForMonth(s.selectedMonth, s.idme, idmeNotes);
+      return { idmeNotes };
+    });
+  };
+
+  resetIdme = () => {
+    const { students, selectedMonth } = this.state;
+    const tingkatanOrder = ['PERALIHAN', '1', '2', '3', '4', '5', 'PPKI'];
+    const counts = {};
+    tingkatanOrder.forEach((t) => {
+      counts[t] = students.filter((s) => s.tingkatan === t).length;
+    });
+    const idmeByMonth = { ...this.state.idmeByMonth };
+    delete idmeByMonth[selectedMonth];
+    try { localStorage.setItem(this.IDME_STORAGE_KEY, JSON.stringify(idmeByMonth)); } catch (e) {}
+    this.setState({ idmeByMonth, idme: counts, idmeNotes: {}, idmeSavedAt: null });
+  };
+
+  setKategori = (k) => this.setState({ kategori: k, tingkatan: '', kelas: '', page: 1 });
+  setFilter = (key, val) => this.setState({ [key]: val, page: 1 });
+  resetFilters = () => this.setState({
+    kategori: 'ARUS', tingkatan: '', kelas: '', sesi: '', kaum: '', jantina: '', mbwnOnly: false, search: '', page: 1,
+  });
+
+  getBaseByKategori(students, kategori) {
+    if (kategori === 'ARUS') return students.filter((s) => ['1', '2', '3', '4', '5'].includes(s.tingkatan));
+    if (kategori === 'PERALIHAN') return students.filter((s) => s.tingkatan === 'PERALIHAN');
+    if (kategori === 'PPKI') return students.filter((s) => s.tingkatan === 'PPKI');
+    return students;
+  }
+
+  getFiltered() {
+    const { students, kategori, tingkatan, kelas, sesi, kaum, jantina, mbwnOnly, search } = this.state;
+    let list = this.getBaseByKategori(students, kategori);
+    if (kategori === 'ARUS' && tingkatan) list = list.filter((s) => s.tingkatan === tingkatan);
+    if (kelas) list = list.filter((s) => s.kelas === kelas);
+    if (sesi) list = list.filter((s) => s.sesi === sesi);
+    if (kaum) list = list.filter((s) => s.kaum === kaum);
+    if (jantina) list = list.filter((s) => s.jantina === jantina);
+    if (mbwnOnly) list = list.filter((s) => s.mbwn);
+    if (search.trim()) {
+      const q = search.trim().toLowerCase();
+      list = list.filter((s) => s.nama.toLowerCase().includes(q));
+    }
+    return list;
+  }
+
+  getKelasOptions() {
+    const { students, kategori, tingkatan } = this.state;
+    let base = this.getBaseByKategori(students, kategori);
+    if (kategori === 'ARUS' && tingkatan) base = base.filter((s) => s.tingkatan === tingkatan);
+    return Array.from(new Set(base.map((s) => s.kelas))).sort();
+  }
+
+  buildBars(list, keyFn, order) {
+    const counts = {};
+    list.forEach((s) => {
+      const k = keyFn(s);
+      counts[k] = (counts[k] || 0) + 1;
+    });
+    const keys = order || Object.keys(counts).sort();
+    const values = Object.values(counts);
+    const max = Math.max(1, ...values);
+    return keys.map((k) => ({ label: k, count: counts[k] || 0, pct: Math.round(((counts[k] || 0) / max) * 100) }));
+  }
+
+  renderVals() {
+    if (!this.state.students.length) {
+      return { loaded: false, monthOptions: this.MONTHS, selectedMonth: this.state.selectedMonth, selectedMonthLabel: (this.MONTHS.find((m) => m.code === this.state.selectedMonth) || {}).label || '', onMonthChange: () => {}, dataSourceNote: '', showNoUploadWarning: false, kpis: [], byTingkatan: [], byKaum: [], byJantina: [], bySesi: [], byKelas: [], kelasOptions: [], pageRows: [], total: 0, page: 1, totalPages: 1, rangeStart: 0, rangeEnd: 0, idmeRows: [], idmeTotalPenyelia: 0, idmeTotalIdme: 0, idmeTotalBeza: 0, idmeMismatchCount: 0, idmeSummaryBg: '#F8F6FE', idmeSummaryBorder: '#EAE5FA', idmeSummaryColor: '#131519', idmeSavedLabel: '', resetIdme: () => {}, onIdmeFileSelected: () => {}, idmeParseError: '' };
+    }
+
+    const filtered = this.getFiltered();
+    const total = filtered.length;
+    const lelaki = filtered.filter((s) => s.jantina === 'L').length;
+    const perempuan = filtered.filter((s) => s.jantina === 'P').length;
+    const mbwn = filtered.filter((s) => s.mbwn).length;
+    const ppki = filtered.filter((s) => s.ppki).length;
+    const bilanganKelas = new Set(filtered.map((s) => s.kelas)).size;
+    const sesiPagi = filtered.filter((s) => s.sesi === 'Pagi').length;
+    const sesiPetang = filtered.filter((s) => s.sesi === 'Petang').length;
+
+    const kpiTints = {
+      '#2454E0': { tint: '#EEF2FF', border: '#D6DEFA' },
+      '#6D5AE0': { tint: '#F1EEFC', border: '#DCD4F7' },
+      '#E0508A': { tint: '#FDEEF4', border: '#F7D1E1' },
+      '#D6336C': { tint: '#FDECF1', border: '#F5C2D6' },
+      '#0BA5B5': { tint: '#E7F8FA', border: '#BEEBF0' },
+      '#7C4EE0': { tint: '#F2EEFC', border: '#DFD2F7' },
+      '#E08A34': { tint: '#FDF3E7', border: '#F5DBB2' },
+      '#8A5CF0': { tint: '#F3EEFD', border: '#E1D2FA' },
+    };
+    const kpis = [
+      { label: 'Jumlah Murid', value: total, accent: '#2454E0' },
+      { label: 'Lelaki', value: lelaki, accent: '#6D5AE0' },
+      { label: 'Perempuan', value: perempuan, accent: '#E0508A' },
+      { label: 'MBWN', value: mbwn, accent: '#D6336C' },
+      { label: 'Murid PPKI', value: ppki, accent: '#0BA5B5' },
+      { label: 'Bilangan Kelas', value: bilanganKelas, accent: '#7C4EE0' },
+      { label: 'Sesi Pagi', value: sesiPagi, accent: '#E08A34' },
+      { label: 'Sesi Petang', value: sesiPetang, accent: '#8A5CF0' },
+    ].map((k) => ({ ...k, tint: kpiTints[k.accent].tint, border: kpiTints[k.accent].border }));
+
+    const tingkatanOrder = ['PERALIHAN', '1', '2', '3', '4', '5', 'PPKI'];
+    const tingkatanLabels = { PERALIHAN: 'Peralihan', '1': 'Ting 1', '2': 'Ting 2', '3': 'Ting 3', '4': 'Ting 4', '5': 'Ting 5', PPKI: 'PPKI' };
+    const byTingkatan = this.buildBars(filtered, (s) => s.tingkatan, tingkatanOrder)
+      .map((b) => ({ ...b, label: tingkatanLabels[b.label] || b.label }));
+
+    const kaumOrder = ['Melayu', 'Cina', 'India', 'Lain-lain'];
+    const kaumColors = { Melayu: '#0B9E76', Cina: '#E0A030', India: '#7C4EE0', 'Lain-lain': '#E0508A' };
+    const byKaum = this.buildBars(filtered, (s) => s.kaum, kaumOrder).map((b) => ({ ...b, color: kaumColors[b.label] }));
+
+    const byJantina = this.buildBars(filtered, (s) => (s.jantina === 'L' ? 'Lelaki' : 'Perempuan'), ['Lelaki', 'Perempuan'])
+      .map((b) => ({ ...b, color: b.label === 'Lelaki' ? '#6D5AE0' : '#E0508A' }));
+
+    const bySesi = this.buildBars(filtered, (s) => s.sesi, ['Pagi', 'Petang'])
+      .map((b) => ({ ...b, color: b.label === 'Pagi' ? '#E08A34' : '#8A5CF0' }));
+
+    const kelasCounts = {};
+    filtered.forEach((s) => { kelasCounts[s.kelas] = (kelasCounts[s.kelas] || 0) + 1; });
+    const maxKelas = Math.max(1, ...Object.values(kelasCounts));
+    const byKelas = Object.keys(kelasCounts).sort().map((k) => ({ label: k, count: kelasCounts[k], pct: Math.round((kelasCounts[k] / maxKelas) * 100) }));
+
+    const kelasOptions = this.getKelasOptions();
+
+    const pageSize = 20;
+    const totalPages = Math.max(1, Math.ceil(total / pageSize));
+    const page = Math.min(this.state.page, totalPages);
+    const badgeOn = 'display: inline-block; padding: 2px 9px; border-radius: 6px; font-size: 12px; font-weight: 700; background: #EAF7EF; color: #0B7A3C;';
+    const badgeOff = 'display: inline-block; padding: 2px 9px; border-radius: 6px; font-size: 12px; font-weight: 600; background: transparent; color: #B0B5BE;';
+    const pageRows = filtered.slice((page - 1) * pageSize, page * pageSize).map((s, i) => ({
+      ...s,
+      tingkatanLabel: tingkatanLabels[s.tingkatan] || s.tingkatan,
+      jantinaLabel: s.jantina === 'L' ? 'Lelaki' : 'Perempuan',
+      mbwnLabel: s.mbwn ? 'Ya' : '-',
+      ppkiLabel: s.ppki ? 'Ya' : '-',
+      mbwnBadgeStyle: s.mbwn ? badgeOn : badgeOff,
+      ppkiBadgeStyle: s.ppki ? badgeOn : badgeOff,
+      rowBg: i % 2 === 1 ? '#FAFBFC' : '#fff',
+    }));
+
+    const tabBase = { padding: '9px 18px', border: '1px solid #EAE5FA', borderRadius: '999px', background: '#F8F6FE', color: '#5F5578', fontSize: '13.5px', fontWeight: 700, cursor: 'pointer' };
+    const tabActive = { ...tabBase, background: 'linear-gradient(120deg, #6D5AE0, #8A5CF0)', borderColor: '#6D5AE0', color: '#fff' };
+    const mbwnBase = { padding: '9px 16px', borderRadius: '999px', border: '1px solid #DCD4F7', background: '#fff', color: '#5F5578', fontSize: '13px', fontWeight: 700, cursor: 'pointer' };
+    const mbwnActive = { ...mbwnBase, background: '#D6336C', color: '#fff', borderColor: '#D6336C' };
+
+    const allStudents = this.state.students;
+    const idmeRows = tingkatanOrder.map((kategori) => {
+      const penyelia = allStudents.filter((s) => s.tingkatan === kategori).length;
+      const idmeValue = this.state.idme[kategori] ?? penyelia;
+      const beza = penyelia - idmeValue;
+      return {
+        label: tingkatanLabels[kategori],
+        penyelia,
+        idmeValue,
+        beza,
+        bezaColor: beza === 0 ? '#0B7A3C' : '#C0362E',
+        rowBg: beza === 0 ? '#fff' : '#FDF3F2',
+        note: this.state.idmeNotes[kategori] || '',
+        onIdmeChange: (e) => this.onIdmeChange(kategori, e.target.value),
+        onNoteChange: (e) => this.onIdmeNoteChange(kategori, e.target.value),
+      };
+    });
+    const idmeTotalPenyelia = idmeRows.reduce((a, r) => a + r.penyelia, 0);
+    const idmeTotalIdme = idmeRows.reduce((a, r) => a + r.idmeValue, 0);
+    const idmeTotalBeza = idmeTotalPenyelia - idmeTotalIdme;
+    const idmeMismatchCount = idmeRows.filter((r) => r.beza !== 0).length;
+    const idmeSavedLabel = this.state.idmeSavedAt
+      ? `Disimpan pada ${new Date(this.state.idmeSavedAt).toLocaleString('ms-MY', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`
+      : 'Belum disimpan';
+
+    const selectedMonthMeta = this.MONTHS.find((m) => m.code === this.state.selectedMonth) || {};
+    const monthHasUpload = Object.keys(this.state.overridesByMonth[this.state.selectedMonth] || {}).length > 0;
+
+    return {
+      loaded: true,
+      monthOptions: this.MONTHS,
+      selectedMonth: this.state.selectedMonth,
+      selectedMonthLabel: selectedMonthMeta.label || '',
+      onMonthChange: this.onMonthChange,
+      dataSourceNote: monthHasUpload ? 'data dimuat naik untuk bulan ini' : 'contoh data — belum ada upload untuk bulan ini',
+      showNoUploadWarning: !monthHasUpload,
+      kpis,
+      byTingkatan, byKaum, byJantina, bySesi, byKelas,
+      kelasOptions,
+      tingkatan: this.state.tingkatan,
+      kelas: this.state.kelas,
+      sesi: this.state.sesi,
+      kaum: this.state.kaum,
+      jantina: this.state.jantina,
+      search: this.state.search,
+      onTingkatanChange: (e) => this.setFilter('tingkatan', e.target.value),
+      onKelasChange: (e) => this.setFilter('kelas', e.target.value),
+      onSesiChange: (e) => this.setFilter('sesi', e.target.value),
+      onKaumChange: (e) => this.setFilter('kaum', e.target.value),
+      onJantinaChange: (e) => this.setFilter('jantina', e.target.value),
+      onMbwnToggle: () => this.setState((s) => ({ mbwnOnly: !s.mbwnOnly, page: 1 })),
+      onSearchChange: (e) => this.setState({ search: e.target.value, page: 1 }),
+      resetFilters: this.resetFilters,
+      selectArus: () => this.setKategori('ARUS'),
+      selectPeralihan: () => this.setKategori('PERALIHAN'),
+      selectPpki: () => this.setKategori('PPKI'),
+      arusBtnStyle: this.state.kategori === 'ARUS' ? tabActive : tabBase,
+      peralihanBtnStyle: this.state.kategori === 'PERALIHAN' ? tabActive : tabBase,
+      ppkiBtnStyle: this.state.kategori === 'PPKI' ? tabActive : tabBase,
+      mbwnBtnStyle: this.state.mbwnOnly ? mbwnActive : mbwnBase,
+      showTingkatanFilter: this.state.kategori === 'ARUS',
+      pageRows,
+      page, totalPages, total,
+      prevPage: () => this.setState((s) => ({ page: Math.max(1, s.page - 1) })),
+      nextPage: () => this.setState((s) => ({ page: Math.min(totalPages, s.page + 1) })),
+      rangeStart: total === 0 ? 0 : (page - 1) * pageSize + 1,
+      rangeEnd: Math.min(page * pageSize, total),
+      idmeRows,
+      idmeTotalPenyelia,
+      idmeTotalIdme,
+      idmeTotalBeza,
+      idmeMismatchCount,
+      idmeSavedLabel,
+      resetIdme: this.resetIdme,
+      onIdmeFileSelected: this.onIdmeFileSelected,
+      idmeParseError: this.state.idmeParseError || '',
+      idmeSummaryBg: idmeMismatchCount === 0 ? '#EAF7EF' : '#FDF3F2',
+      idmeSummaryBorder: idmeMismatchCount === 0 ? '#B9E6C9' : '#F0CAC5',
+      idmeSummaryColor: idmeMismatchCount === 0 ? '#0B7A3C' : '#C0362E',
+    };
+  }
+}
+
+</script>
+</body>
+</html>
