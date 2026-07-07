@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <meta charset="utf-8">
+  <style>
+    doc-page:not(:defined){visibility:hidden}
+    @media print {
+      [data-print-header] { page-break-after: avoid; break-after: avoid; page-break-inside: avoid; }
+      [data-print-nowrap] { white-space: nowrap !important; overflow: hidden; text-overflow: ellipsis; font-size: 8.5pt !important; font-weight: 700 !important; }
+      [data-print-hide] { display: none !important; }
+
+      /* Real print sizing — no zoom/transform/scale. Bump px→pt and bold
+         everything for legibility, matching the old system's output. */
+      [data-print-table] { font-size: 9pt !important; }
+      [data-print-table] thead th { font-weight: 800 !important; font-size: 9.5pt !important; padding: 2px 3px !important; }
+      [data-print-table] tbody td { font-weight: 700 !important; padding: 1px 2px !important; white-space: nowrap !important; }
+      [data-print-table] tbody tr[data-print-strong] td { font-weight: 800 !important; }
+      [data-print-table] { border-width: 2pt !important; border-color: #000 !important; }
+      [data-print-table] th, [data-print-table] td { border-width: 1pt !important; border-color: #1a1a1a !important; }
+      [data-print-table], [data-print-summary] { color: #000 !important; }
+
+      [data-print-tight] { margin-top: 6px !important; }
+      [data-print-tight-lg] { margin-top: 10px !important; }
+      [data-print-summary] { font-size: 9pt !important; }
+      [data-print-summary] th { font-weight: 800 !important; font-size: 9.5pt !important; }
+      [data-print-summary] td { font-weight: 700 !important; }
+
+      /* Induk Besar (landscape, multi-page): school header only on page 1;
+         column header repeats every page via table-header-group. */
+      [data-print-mode="besar"] [data-print-header] { display: none; }
+      [data-print-mode="besar"] table thead { display: table-header-group; }
+
+      [data-print-mode="a4fit"] { zoom: 1; }
+      [data-print-mode="besar"] { zoom: 1.1; }
+    }
+  </style>
+</helmet>
+
+<div data-screen-label="Laporan INDUK" style="min-height: 100vh; background: #E8EAEE; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;">
+
+  <div data-print-hide="" style="max-width: 1160px; margin: 0 auto; padding: 20px 0 0; display: flex; justify-content: flex-end; align-items: center; gap: 10px;">
+    <a href="./Dashboard.dc.html" style="margin-right: auto; background: #fff; border: 1px solid #D0D5DD; border-radius: 8px; padding: 9px 16px; font-size: 13px; color: #333A45; font-weight: 700; text-decoration: none;">← Dashboard</a>
+    <select value="{{ selectedMonth }}" onChange="{{ onMonthChange }}" style="padding: 9px 14px; border-radius: 8px; border: 1px solid #D0D5DD; background: #fff; color: #333A45; font-size: 13px; font-weight: 700; cursor: pointer;">
+      <sc-for list="{{ monthOptions }}" as="m" hint-placeholder-count="12">
+        <option value="{{ m.code }}">{{ m.label }}</option>
+      </sc-for>
+    </select>
+    <button onClick="{{ selectA4Mode }}" style="{{ a4BtnStyle }}">A4 (Satu Halaman)</button>
+    <button onClick="{{ selectBesarMode }}" style="{{ besarBtnStyle }}">Induk Besar (Landskap)</button>
+    <button onClick="{{ onPrint }}" style="background: #2454E0; color: #fff; border: 1px solid #2454E0; border-radius: 8px; padding: 9px 20px; font-size: 13px; font-weight: 700; cursor: pointer;">Cetak</button>
+  </div><x-import component-from-global-scope="doc-page" from="./doc-page.js" width="{{ pageWidth }}" height="{{ pageHeight }}" margin="5mm" hint-size="100%,1100px">
+  
+  <div data-print-mode="{{ printMode }}" style="{{ contentWrapperStyle }}">
+
+    
+
+    <div data-print-header="" style="display: flex; align-items: center; justify-content: space-between; gap: 18px; background: linear-gradient(120deg, #0B2E6B 0%, #1E5FBF 100%); border-radius: 8px; padding: 12px 20px; border: 1.5px solid #0A2050;">
+      
+      <div style="display: flex; align-items: center; gap: 12px; flex-shrink: 0; width: 585px; height: 93px">
+        <div style="width: 98px; height: 102px; background: #fff; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.3)">
+          <img src="./assets/Lencana_SMK_Lunas_small.png" alt="Lencana SMK Lunas" width="34" height="34" style="height: 91px; width: 76px">
+        </div>
+        <div style="text-align: left; width: 397px; height: 93px">
+          <div style="font-weight: 800; font-size: 15px; color: #fff; letter-spacing: 0.015em;">SEKOLAH MENENGAH KEBANGSAAN LUNAS</div>
+          <div style="font-size: 12px; color: #DBEAFE; margin-top: 2px; line-height: 1.4">Jalan Padang Serai,<br>09600 Lunas, Kedah Darul Aman.</div><div style="font-size: 12px; color: #DBEAFE; margin-top: 3px; line-height: 1.4">No. Tel : 04-4848773<br>E-mel : kea5069@moe.edu.my</div>
+          
+        </div>
+      </div><div style="text-align: center; flex: 1;">
+        
+      </div>
+      <div style="text-align: right; font-size: 9.5px; color: #DBEAFE; flex-shrink: 0; min-width: 110px;">
+        <div style="font-weight: 800; font-size: 15px; color: #fff; letter-spacing: 0.015em;">ENROLMEN<br><span style="font-size: 17px; color: #FDE047;">BULAN {{ selectedMonthLabelUpper }}</span></div>
+      </div>
+    </div><table data-print-table="" style="width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; border: 2.5px solid #0F172A;">
+      <thead style="display: table-header-group;">
+        <tr style="background: #14418E; color: #fff;">
+          <th rowspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 3%;">BIL</th>
+          <th rowspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 28%;">GURU TINGKATAN</th>
+          <th rowspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 4%;">KELAS</th>
+          <th colspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 11%;">MELAYU</th>
+          <th colspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 11%;">CINA</th>
+          <th colspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 11%;">INDIA</th>
+          <th colspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 11%;">LAIN-LAIN</th>
+          <th rowspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 5%;">JUM. L</th>
+          <th rowspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 5%;">JUM. P</th>
+          <th rowspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 5%;">JUMLAH</th>
+          <th rowspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 6%;">JUMLAH BESAR</th>
+        </tr>
+        <tr style="background: #1E5FBF; color: #fff;">
+          <th style="border: 1.6px solid #9DC4F5; padding: 3px; text-align: center; vertical-align: middle;">L</th><th style="border: 1.6px solid #9DC4F5; padding: 3px; text-align: center; vertical-align: middle;">P</th>
+          <th style="border: 1.6px solid #9DC4F5; padding: 3px; text-align: center; vertical-align: middle;">L</th><th style="border: 1.6px solid #9DC4F5; padding: 3px; text-align: center; vertical-align: middle;">P</th>
+          <th style="border: 1.6px solid #9DC4F5; padding: 3px; text-align: center; vertical-align: middle;">L</th><th style="border: 1.6px solid #9DC4F5; padding: 3px; text-align: center; vertical-align: middle;">P</th>
+          <th style="border: 1.6px solid #9DC4F5; padding: 3px; text-align: center; vertical-align: middle;">L</th><th style="border: 1.6px solid #9DC4F5; padding: 3px; text-align: center; vertical-align: middle;">P</th>
+        </tr>
+      </thead>
+      <tbody style="display: table-row-group;">
+        <sc-for list="{{ mainstreamRows }}" as="row" hint-placeholder-count="4">
+          <tr data-print-strong="{{ row.isTotal }}" style="{{ row.trStyle }}">
+            <sc-if value="{{ row.isHeader }}" hint-placeholder-val="{{ false }}">
+              <td colspan="14" style="border: 1.4px solid #334155; padding: 5px 6px; font-weight: 800; color: #0F172A;">{{ row.headerText }}</td>
+            </sc-if>
+            <sc-if value="{{ row.isData }}" hint-placeholder-val="{{ true }}">
+              <td style="border: 1.4px solid #334155; padding: 1px; text-align: center; font-weight: 700;">{{ row.bil }}</td>
+              <td data-print-nowrap="" style="border: 1.4px solid #334155; padding: 1.5px 3px; text-align: left; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 0;">{{ row.guru }}</td>
+              <td data-print-nowrap="" style="border: 1.4px solid #334155; padding: 1.5px 3px; text-align: center; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 0;">{{ row.kelas }}</td>
+              <td style="{{ numTdStyle }}">{{ row.ml }}</td>
+              <td style="{{ numTdStyle }}">{{ row.mp }}</td>
+              <td style="{{ numTdStyle }}">{{ row.cl }}</td><td style="{{ numTdStyle }}">{{ row.cp }}</td>
+              <td style="{{ numTdStyle }}">{{ row.il }}</td>
+              <td style="{{ numTdStyle }}">{{ row.ip }}</td>
+              <td style="{{ numTdStyle }}">{{ row.ll }}</td>
+              <td style="{{ numTdStyle }}">{{ row.lp }}</td>
+              <td style="{{ numTdStyle }}">{{ row.jumL }}</td>
+              <td style="{{ numTdStyle }}">{{ row.jumP }}</td>
+              <td style="{{ numTdStyle }}">{{ row.jumlah }}</td>
+            </sc-if>
+            <sc-if value="{{ row.jumlahBesarShow }}" hint-placeholder-val="{{ false }}">
+              <td rowspan="{{ row.jumlahBesarRowspan }}" style="border: 2px solid #0F172A; padding: 1.5px; text-align: center; font-weight: 800; font-size: 17px; background: #fff; color: #0F172A;">{{ row.jumlahBesarVal }}</td>
+            </sc-if>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+
+    
+
+    <div style="font-weight: 800; font-size: 14px; color: #0F172A; margin-top: 8px; margin-bottom: 6px;">PPKI (PENDIDIKAN KHAS)</div><div data-print-tight="">
+      
+      <table data-print-table="" style="width: 100%; border-collapse: collapse; font-size: 12px; table-layout: fixed; border: 2.5px solid #0F172A;">
+        <thead style="display: table-header-group;">
+          <tr style="background: #14418E; color: #fff;">
+            <th rowspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 3%;">BIL</th>
+            <th rowspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 28%;">GURU TINGKATAN</th>
+            <th rowspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 4%;">KELAS</th>
+            <th colspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 11%;">MELAYU</th>
+            <th colspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 11%;">CINA</th>
+            <th colspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 11%;">INDIA</th>
+            <th colspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 11%;">LAIN-LAIN</th>
+            <th rowspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 5%;">JUM. L</th>
+            <th rowspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 5%;">JUM. P</th>
+            <th rowspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 5%;">JUMLAH</th>
+            <th rowspan="2" style="border: 1.6px solid #9DC4F5; padding: 4px 3px; text-align: center; vertical-align: middle; width: 6%;">JUMLAH BESAR</th>
+          </tr>
+          <tr style="background: #1E5FBF; color: #fff;">
+            <th style="border: 1.6px solid #9DC4F5; padding: 3px; text-align: center; vertical-align: middle;">L</th><th style="border: 1.6px solid #9DC4F5; padding: 3px; text-align: center; vertical-align: middle;">P</th>
+            <th style="border: 1.6px solid #9DC4F5; padding: 3px; text-align: center; vertical-align: middle;">L</th><th style="border: 1.6px solid #9DC4F5; padding: 3px; text-align: center; vertical-align: middle;">P</th>
+            <th style="border: 1.6px solid #9DC4F5; padding: 3px; text-align: center; vertical-align: middle;">L</th><th style="border: 1.6px solid #9DC4F5; padding: 3px; text-align: center; vertical-align: middle;">P</th>
+            <th style="border: 1.6px solid #9DC4F5; padding: 3px; text-align: center; vertical-align: middle;">L</th><th style="border: 1.6px solid #9DC4F5; padding: 3px; text-align: center; vertical-align: middle;">P</th>
+          </tr>
+        </thead>
+        <tbody style="display: table-row-group;">
+          <sc-for list="{{ ppkiRows }}" as="row" hint-placeholder-count="4">
+            <tr data-print-strong="{{ row.isTotal }}" style="{{ row.trStyle }}">
+              <sc-if value="{{ row.isHeader }}" hint-placeholder-val="{{ false }}">
+                <td colspan="14" style="border: 1.4px solid #334155; padding: 5px 6px; font-weight: 800; color: #0F172A;">{{ row.headerText }}</td>
+              </sc-if>
+              <sc-if value="{{ row.isData }}" hint-placeholder-val="{{ true }}">
+                <td style="border: 1.4px solid #334155; padding: 1px; text-align: center; font-weight: 700;">{{ row.bil }}</td>
+                <td data-print-nowrap="" style="border: 1.4px solid #334155; padding: 1.5px 3px; text-align: left; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 0;">{{ row.guru }}</td>
+                <td data-print-nowrap="" style="border: 1.4px solid #334155; padding: 1.5px 3px; text-align: center; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 0;">{{ row.kelas }}</td>
+                <td style="{{ numTdStyle }}">{{ row.ml }}</td>
+                <td style="{{ numTdStyle }}">{{ row.mp }}</td>
+                <td style="{{ numTdStyle }}">{{ row.cl }}</td>
+                <td style="{{ numTdStyle }}">{{ row.cp }}</td>
+                <td style="{{ numTdStyle }}">{{ row.il }}</td>
+                <td style="{{ numTdStyle }}">{{ row.ip }}</td>
+                <td style="{{ numTdStyle }}">{{ row.ll }}</td>
+                <td style="{{ numTdStyle }}">{{ row.lp }}</td>
+                <td style="{{ numTdStyle }}">{{ row.jumL }}</td>
+                <td style="{{ numTdStyle }}">{{ row.jumP }}</td>
+                <td style="{{ numTdStyle }}">{{ row.jumlah }}</td>
+              </sc-if>
+              <sc-if value="{{ row.jumlahBesarShow }}" hint-placeholder-val="{{ false }}">
+                <td rowspan="{{ row.jumlahBesarRowspan }}" style="border: 2px solid #0F172A; padding: 1.5px; text-align: center; font-weight: 800; font-size: 17px; background: #fff; color: #0F172A;">{{ row.jumlahBesarVal }}</td>
+              </sc-if>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div><div data-print-tight="" style="margin-top: 8px; font-size: 12px;">
+      <div style="font-weight: 800; margin-bottom: 6px; color: #0F172A;">BILANGAN KELAS: {{ bilanganKelas }}</div>
+      <table data-print-summary="" style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr>
+            <th style="border: 1.4px solid #334155; padding: 5px 8px; background: #14418E; color: #fff; text-align: left;"></th>
+            <th style="border: 1.4px solid #334155; padding: 5px 8px; background: #14418E; color: #fff; text-align: center">LELAKI</th>
+            <th style="border: 1.4px solid #334155; padding: 5px 8px; background: #14418E; color: #fff; text-align: center">PEREMPUAN</th>
+            <th style="border: 1.4px solid #334155; padding: 5px 8px; background: #14418E; color: #fff; text-align: center">JUMLAH</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: left; font-weight: 700; background: #F1F5F9;">JUMLAH SESI PAGI</td>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: center; font-weight: 700;">{{ sesiPagiL }}</td>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: center; font-weight: 700;">{{ sesiPagiP }}</td>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: center; font-weight: 700;">{{ sesiPagi }}</td>
+          </tr>
+          <tr>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: left; font-weight: 700; background: #F1F5F9;">JUMLAH SESI PETANG</td>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: center; font-weight: 700;">{{ sesiPetangL }}</td>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: center; font-weight: 700;">{{ sesiPetangP }}</td>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: center; font-weight: 700;">{{ sesiPetang }}</td>
+          </tr>
+          <tr>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: left; font-weight: 800; background: #E2E8F0;">JUMLAH (ARUS PERDANA)</td>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: center; font-weight: 800; background: #E2E8F0;">{{ jumlahArusL }}</td>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: center; font-weight: 800; background: #E2E8F0;">{{ jumlahArusP }}</td>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: center; font-weight: 800; background: #E2E8F0;">{{ jumlahArus }}</td>
+          </tr>
+          <tr>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: left; font-weight: 700; background: #F1F5F9;">PENDIDIKAN KHAS (PPKI)</td>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: center; font-weight: 700;">{{ jumlahPpkiL }}</td>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: center; font-weight: 700;">{{ jumlahPpkiP }}</td>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: center; font-weight: 700;">{{ jumlahPpki }}</td>
+          </tr>
+          <tr>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: left; font-weight: 800; background: #14418E; color: #fff;">JUMLAH KESELURUHAN</td>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: center; font-weight: 800; background: #14418E; color: #fff;">{{ jumlahKeseluruhanL }}</td>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: center; font-weight: 800; background: #14418E; color: #fff;">{{ jumlahKeseluruhanP }}</td>
+            <td style="border: 1.4px solid #334155; padding: 5px 8px; text-align: center; font-weight: 800; font-size: 16px; background: #14418E; color: #fff">{{ jumlahKeseluruhan }}</td>
+          </tr>
+        </tbody>
+      </table>
+      
+    </div>
+
+    <div data-print-tight-lg="" style="margin-top: 14px; display: flex; justify-content: space-between; font-size: 15px; color: #334155">
+      <div>Disediakan Oleh: AJK Data Enrolmen Murid 2026</div>
+      <div>Tarikh Kemaskini: 31 Mac 2026</div>
+      <div style="font-size: 15px;">Tarikh Cetakan: {{ todayLabel }}</div>
+    </div>
+
+  </div></x-import>
+
+  
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;dataAlign&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;center&quot;, &quot;options&quot;: [&quot;left&quot;, &quot;center&quot;, &quot;right&quot;], &quot;tsType&quot;: &quot;'left'|'center'|'right'&quot;, &quot;section&quot;: &quot;Jadual&quot;}}">
+class Component extends DCLogic {
+  state = { loaded: false, printMode: 'a4fit', selectedMonth: '04' };
+
+  MONTHS = [
+    { code: '01', label: 'Januari' },
+    { code: '02', label: 'Februari' },
+    { code: '03', label: 'Mac' },
+    { code: '04', label: 'April' },
+    { code: '05', label: 'Mei' },
+    { code: '06', label: 'Jun' },
+    { code: '07', label: 'Julai' },
+    { code: '08', label: 'Ogos' },
+    { code: '09', label: 'September' },
+    { code: '10', label: 'Oktober' },
+    { code: '11', label: 'November' },
+    { code: '12', label: 'Disember' },
+  ];
+
+  UPLOAD_OVERRIDES_KEY = 'uploaded-students-v2';
+  UPLOAD_OVERRIDES_KEY_LEGACY = 'uploaded-students-v1';
+  SELECTED_MONTH_KEY = 'dashboard-month-v1';
+
+  loadOverridesByMonth() {
+    try {
+      const raw = localStorage.getItem(this.UPLOAD_OVERRIDES_KEY);
+      if (raw) return JSON.parse(raw);
+      const legacy = localStorage.getItem(this.UPLOAD_OVERRIDES_KEY_LEGACY);
+      if (legacy) {
+        const data = JSON.parse(legacy);
+        if (data && Object.keys(data).length) return { '04': data };
+      }
+    } catch (e) {}
+    return {};
+  }
+
+  loadSelectedMonth() {
+    try {
+      return localStorage.getItem(this.SELECTED_MONTH_KEY) || '';
+    } catch (e) {
+      return '';
+    }
+  }
+
+  saveSelectedMonth(month) {
+    try { localStorage.setItem(this.SELECTED_MONTH_KEY, month); } catch (e) {}
+  }
+
+  applyUploadOverrides(baseStudents, overrides) {
+    const overrideKelas = Object.keys(overrides);
+    if (!overrideKelas.length) return baseStudents;
+    let result = baseStudents.filter((s) => !overrideKelas.includes(s.kelas));
+    let nextId = Math.max(0, ...baseStudents.map((s) => s.id || 0)) + 1;
+    overrideKelas.forEach((kelas) => {
+      const ov = overrides[kelas];
+      (ov.students || []).forEach((st) => {
+        result.push({
+          id: nextId++,
+          nama: st.nama,
+          tingkatan: ov.tingkatan,
+          kelas,
+          jantina: st.jantina,
+          kaum: st.kaum,
+          mbwn: !!st.mbwn,
+          ppki: !!ov.ppki,
+          sesi: 'Pagi',
+        });
+      });
+    });
+    return result;
+  }
+
+  componentDidMount() {
+    Promise.all([
+      import('./data/students.js'),
+      import('./data/indukMeta.js'),
+    ]).then(([studentsMod, metaMod]) => {
+      const overridesByMonth = this.loadOverridesByMonth();
+      let selectedMonth = this.loadSelectedMonth();
+      if (!selectedMonth) {
+        let latest = null, latestTime = 0;
+        Object.entries(overridesByMonth).forEach(([code, overrides]) => {
+          Object.values(overrides).forEach((entry) => {
+            const t = entry.savedAt ? new Date(entry.savedAt).getTime() : 0;
+            if (t > latestTime) { latestTime = t; latest = code; }
+          });
+        });
+        selectedMonth = latest || '04';
+      }
+      const overrides = overridesByMonth[selectedMonth] || {};
+      const students = this.applyUploadOverrides(studentsMod.STUDENTS, overrides);
+      const computed = this.computeReport(students, metaMod.MAINSTREAM_SECTIONS, metaMod.PPKI_SECTION);
+      this.setState({
+        loaded: true,
+        baseStudents: studentsMod.STUDENTS,
+        mainstreamSections: metaMod.MAINSTREAM_SECTIONS,
+        ppkiSection: metaMod.PPKI_SECTION,
+        overridesByMonth,
+        selectedMonth,
+        ...computed,
+      });
+    });
+  }
+
+  onMonthChange = (e) => {
+    const selectedMonth = e.target.value;
+    const overrides = this.state.overridesByMonth[selectedMonth] || {};
+    const students = this.applyUploadOverrides(this.state.baseStudents, overrides);
+    const computed = this.computeReport(students, this.state.mainstreamSections, this.state.ppkiSection);
+    this.saveSelectedMonth(selectedMonth);
+    this.setState({ selectedMonth, ...computed });
+  };
+
+  computeReport(students, MAINSTREAM_SECTIONS, PPKI_SECTION) {
+    const { rows: mainstreamRows, grandTotal: mainstreamGrand } = this.buildRows(students, MAINSTREAM_SECTIONS);
+    const { rows: ppkiRows } = this.buildRows(students, PPKI_SECTION ? [PPKI_SECTION] : []);
+
+    if (mainstreamRows.length) {
+      mainstreamRows.push({
+        isHeader: false, isData: true, isTotal: true, trStyle: 'background:#0F172A; color:#fff; font-weight:800; page-break-inside:avoid;',
+        bil: '', guru: 'JUMLAH BESAR (ARUS PERDANA)', kelas: '', ...mainstreamGrand,
+        jumlahBesarShow: true, jumlahBesarRowspan: 1, jumlahBesarVal: mainstreamGrand.jumlah,
+      });
+    }
+
+    const mainstreamStudents = students.filter((s) => !s.ppki);
+    const ppkiStudents = students.filter((s) => s.ppki);
+    const sesiPagiL = mainstreamStudents.filter((s) => s.sesi === 'Pagi' && s.jantina === 'L').length;
+    const sesiPagiP = mainstreamStudents.filter((s) => s.sesi === 'Pagi' && s.jantina === 'P').length;
+    const sesiPetangL = mainstreamStudents.filter((s) => s.sesi === 'Petang' && s.jantina === 'L').length;
+    const sesiPetangP = mainstreamStudents.filter((s) => s.sesi === 'Petang' && s.jantina === 'P').length;
+    const sesiPagi = sesiPagiL + sesiPagiP;
+    const sesiPetang = sesiPetangL + sesiPetangP;
+    const jumlahArusL = mainstreamStudents.filter((s) => s.jantina === 'L').length;
+    const jumlahArusP = mainstreamStudents.filter((s) => s.jantina === 'P').length;
+    const jumlahArus = mainstreamStudents.length;
+    const jumlahPpkiL = ppkiStudents.filter((s) => s.jantina === 'L').length;
+    const jumlahPpkiP = ppkiStudents.filter((s) => s.jantina === 'P').length;
+    const jumlahPpki = ppkiStudents.length;
+    const bilanganKelas = new Set(students.map((s) => s.kelas)).size;
+
+    const today = new Date();
+    const bulanNama = ['Januari','Februari','Mac','April','Mei','Jun','Julai','Ogos','September','Oktober','November','Disember'];
+    const todayLabel = `${today.getDate()} ${bulanNama[today.getMonth()]} ${today.getFullYear()}`;
+
+    return {
+      mainstreamRows,
+      ppkiRows,
+      bilanganKelas,
+      sesiPagi, sesiPetang, sesiPagiL, sesiPagiP, sesiPetangL, sesiPetangP,
+      jumlahArus, jumlahArusL, jumlahArusP,
+      jumlahPpki, jumlahPpkiL, jumlahPpkiP,
+      jumlahKeseluruhan: jumlahArus + jumlahPpki,
+      jumlahKeseluruhanL: jumlahArusL + jumlahPpkiL,
+      jumlahKeseluruhanP: jumlahArusP + jumlahPpkiP,
+      todayLabel,
+    };
+  }
+
+  selectA4Mode = () => this.setState({ printMode: 'a4fit' });
+  selectBesarMode = () => this.setState({ printMode: 'besar' });
+  onPrint = () => window.print();
+
+  countFor(list, tingkatan, kelas) {
+    const rows = list.filter((s) => s.tingkatan === tingkatan && s.kelas === kelas);
+    const c = (kaum, jantina) => rows.filter((s) => s.kaum === kaum && s.jantina === jantina).length;
+    const ml = c('Melayu', 'L'), mp = c('Melayu', 'P');
+    const cl = c('Cina', 'L'), cp = c('Cina', 'P');
+    const il = c('India', 'L'), ip = c('India', 'P');
+    const ll = c('Lain-lain', 'L'), lp = c('Lain-lain', 'P');
+    const jumL = ml + cl + il + ll;
+    const jumP = mp + cp + ip + lp;
+    return { ml, mp, cl, cp, il, ip, ll, lp, jumL, jumP, jumlah: jumL + jumP };
+  }
+
+  sumCounts(items) {
+    return items.reduce((a, b) => ({
+      ml: a.ml + b.ml, mp: a.mp + b.mp, cl: a.cl + b.cl, cp: a.cp + b.cp,
+      il: a.il + b.il, ip: a.ip + b.ip, ll: a.ll + b.ll, lp: a.lp + b.lp,
+      jumL: a.jumL + b.jumL, jumP: a.jumP + b.jumP, jumlah: a.jumlah + b.jumlah,
+    }), { ml: 0, mp: 0, cl: 0, cp: 0, il: 0, ip: 0, ll: 0, lp: 0, jumL: 0, jumP: 0, jumlah: 0 });
+  }
+
+  buildRows(students, sections) {
+    const rows = [];
+    let bil = 1;
+    let sectionGrand = [];
+    sections.forEach((section) => {
+      const sectionStartIdx = rows.length;
+      rows.push({ isHeader: true, isData: false, headerText: `${section.label} — Penyelia: ${section.penyelia}`, trStyle: 'background:#E0F2FE;', jumlahBesarShow: false, jumlahBesarRowspan: 1, jumlahBesarVal: '' });
+      const subgroupTotals = [];
+      section.subgroups.forEach((sg) => {
+        if (sg.label) {
+          rows.push({ isHeader: true, isData: false, headerText: sg.label, trStyle: 'background:#F1F5F9;', jumlahBesarShow: false, jumlahBesarRowspan: 1, jumlahBesarVal: '' });
+        }
+        const counted = sg.kelasList.map((k) => ({ ...this.countFor(students, section.tingkatan, k.kelas), guru: k.guru, kelas: k.kelas }));
+        counted.forEach((c) => {
+          rows.push({
+            isHeader: false, isData: true, isTotal: false, trStyle: 'page-break-inside:avoid;',
+            bil: bil++, guru: c.guru, kelas: c.kelas,
+            ml: c.ml, mp: c.mp, cl: c.cl, cp: c.cp, il: c.il, ip: c.ip, ll: c.ll, lp: c.lp,
+            jumL: c.jumL, jumP: c.jumP, jumlah: c.jumlah,
+            jumlahBesarShow: false, jumlahBesarRowspan: 1, jumlahBesarVal: '',
+          });
+        });
+        const sgTotal = this.sumCounts(counted);
+        subgroupTotals.push(sgTotal);
+        if (section.subgroups.length > 1) {
+          rows.push({
+            isHeader: false, isData: true, isTotal: true, trStyle: 'background:#F8FAFC; font-weight:700; page-break-inside:avoid;',
+            bil: '', guru: `JUMLAH ${sg.label || ''}`, kelas: '',
+            ...sgTotal, jumlahBesarShow: false, jumlahBesarRowspan: 1, jumlahBesarVal: '',
+          });
+        }
+      });
+      const secTotal = this.sumCounts(subgroupTotals);
+      sectionGrand.push(secTotal);
+      rows.push({
+        isHeader: false, isData: true, isTotal: true, trStyle: 'background:#DBEAFE; font-weight:800; page-break-inside:avoid;',
+        bil: '', guru: `JUMLAH ${section.label}`, kelas: '',
+        ...secTotal, jumlahBesarShow: false, jumlahBesarRowspan: 1, jumlahBesarVal: '',
+      });
+      // Merge the JUMLAH BESAR cell across the whole section (banner through subtotal row)
+      const sectionRowCount = rows.length - sectionStartIdx;
+      rows[sectionStartIdx].jumlahBesarShow = true;
+      rows[sectionStartIdx].jumlahBesarRowspan = sectionRowCount;
+      rows[sectionStartIdx].jumlahBesarVal = secTotal.jumlah;
+    });
+    return { rows, grandTotal: this.sumCounts(sectionGrand) };
+  }
+
+  buildPrintProps() {
+    const isFit = this.state.printMode === 'a4fit';
+    const pageWidth = isFit ? '210mm' : '297mm';
+    const pageHeight = isFit ? '297mm' : '210mm';
+    const contentWrapperStyle = { display: 'flex', flexDirection: 'column', gap: '2px', width: '100%' };
+    const dataAlign = this.props.dataAlign ?? 'center';
+    const numTdStyle = { border: '1.4px solid #334155', padding: '1.5px', textAlign: dataAlign, fontWeight: 700 };
+    const btnBase = { padding: '9px 18px', borderRadius: '8px', border: '1px solid #D0D5DD', background: '#fff', color: '#5F6570', fontSize: '13px', fontWeight: 700, cursor: 'pointer' };
+    const btnActive = { ...btnBase, background: '#2454E0', color: '#fff', borderColor: '#2454E0' };
+    return {
+      pageWidth, pageHeight, contentWrapperStyle, numTdStyle,
+      printMode: this.state.printMode,
+      a4BtnStyle: isFit ? btnActive : btnBase,
+      besarBtnStyle: !isFit ? btnActive : btnBase,
+      selectA4Mode: this.selectA4Mode,
+      selectBesarMode: this.selectBesarMode,
+      onPrint: this.onPrint,
+    };
+  }
+
+  renderVals() {
+    const printProps = this.buildPrintProps();
+    const monthMeta = this.MONTHS.find((m) => m.code === this.state.selectedMonth) || {};
+    const monthProps = {
+      monthOptions: this.MONTHS,
+      selectedMonth: this.state.selectedMonth || '04',
+      onMonthChange: this.onMonthChange,
+      selectedMonthLabelUpper: (monthMeta.label || '').toUpperCase(),
+    };
+    if (!this.state.loaded) {
+      return { mainstreamRows: [], ppkiRows: [], bilanganKelas: 0, sesiPagi: 0, sesiPetang: 0, sesiPagiL: 0, sesiPagiP: 0, sesiPetangL: 0, sesiPetangP: 0, jumlahArus: 0, jumlahArusL: 0, jumlahArusP: 0, jumlahPpki: 0, jumlahPpkiL: 0, jumlahPpkiP: 0, jumlahKeseluruhan: 0, jumlahKeseluruhanL: 0, jumlahKeseluruhanP: 0, todayLabel: '', ...printProps, ...monthProps };
+    }
+
+    return {
+      mainstreamRows: this.state.mainstreamRows,
+      ppkiRows: this.state.ppkiRows,
+      bilanganKelas: this.state.bilanganKelas,
+      sesiPagi: this.state.sesiPagi, sesiPetang: this.state.sesiPetang,
+      sesiPagiL: this.state.sesiPagiL, sesiPagiP: this.state.sesiPagiP,
+      sesiPetangL: this.state.sesiPetangL, sesiPetangP: this.state.sesiPetangP,
+      jumlahArus: this.state.jumlahArus, jumlahArusL: this.state.jumlahArusL, jumlahArusP: this.state.jumlahArusP,
+      jumlahPpki: this.state.jumlahPpki, jumlahPpkiL: this.state.jumlahPpkiL, jumlahPpkiP: this.state.jumlahPpkiP,
+      jumlahKeseluruhan: this.state.jumlahKeseluruhan,
+      jumlahKeseluruhanL: this.state.jumlahKeseluruhanL,
+      jumlahKeseluruhanP: this.state.jumlahKeseluruhanP,
+      todayLabel: this.state.todayLabel,
+      ...printProps,
+      ...monthProps,
+    };
+  }
+}
+</script>
+</body>
+</html>

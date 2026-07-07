@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+
+<helmet>
+  <meta charset="utf-8"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@500;700&family=Manrope:wght@600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    body { margin: 0; background: #F5F3FE; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-thumb { background: #C7CDD6; border-radius: 8px; }
+    a { color: #6D5AE0; }
+    a:hover { color: #5A46D6; }
+    select:focus, input:focus, button:focus { outline: 2px solid #6D5AE0; outline-offset: 1px; }
+  </style>
+</helmet>
+
+<div data-screen-label="Upload Data Murid" style="min-height: 100vh; background: #F5F3FE; font-family: 'Public Sans', sans-serif; color: #20242C; padding: 0 0 60px;">
+
+  <!-- App bar -->
+  <div style="background: linear-gradient(120deg, #6D5AE0, #8A5CF0 55%, #E0508A); padding: 16px 32px; box-shadow: 0 4px 16px rgba(109,90,224,0.18);">
+    <div style="max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 42px; height: 42px; background: #fff; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.12);">
+          <img src="./assets/Lencana_SMK_Lunas_small.png" alt="Lencana SMK Lunas" style="width: 30px; height: 36px;"/>
+        </div>
+        <div>
+          <div style="font-family: 'Google Sans', 'Manrope', sans-serif; font-weight: 700; font-size: 17px; color: #fff; letter-spacing: -0.01em;">Upload Data Murid</div>
+          <div style="font-size: 12.5px; color: rgba(255,255,255,0.85);">Untuk penyelia — hantar senarai murid ikut kelas</div>
+        </div>
+      </div>
+      <a href="./Dashboard.dc.html" style="background: #fff; border: 1px solid #fff; border-radius: 999px; padding: 8px 18px; font-size: 13px; color: #6D5AE0; font-weight: 700; text-decoration: none; white-space: nowrap;">← Dashboard</a>
+    </div>
+  </div>
+
+  <div style="max-width: 1100px; margin: 0 auto; padding: 24px 32px 0;">
+
+    <!-- Privacy notice -->
+    <div style="background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 14px; padding: 14px 18px; margin-bottom: 20px; font-size: 13px; color: #8A5A00; line-height: 1.5;">
+      <strong>Penting:</strong> Hanya <strong>nama, kelas, jantina, kaum dan status MBWN</strong> disimpan. Sistem ini <strong>TIDAK</strong> menyimpan No. Kad Pengenalan, nombor telefon, alamat, nama waris, atau kategori OKU/diagnosis walaupun ada dalam fail asal — medan itu diabaikan secara automatik semasa fail dibaca.
+    </div>
+
+    <!-- Step 1: Upload per bulan -->
+    <div style="background: #fff; border: 1px solid #EAE5FA; border-radius: 14px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(32,20,80,0.05);">
+      <div style="font-size: 12.5px; color: #5F5578; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 4px;">Langkah 1 — Muat naik fail Excel ikut bulan</div>
+      <div style="font-size: 12.5px; color: #9088AE; margin-bottom: 16px;">Pautkan setiap bulan ke fail Google Sheets berkenaan, kemudian muat naik eksport .xlsx bulan itu. Dashboard akan ambil data mengikut bulan yang dipilih.</div>
+
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+        <sc-for list="{{ months }}" as="m" hint-placeholder-count="12">
+          <div style="border: 1px solid {{ m.cardBorder }}; border-radius: 12px; padding: 14px 16px; background: {{ m.cardBg }};">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+              <div style="font-family: 'Google Sans', 'Manrope', sans-serif; font-weight: 800; font-size: 15px; color: #131519;">{{ m.label }}</div>
+              <sc-if value="{{ m.hasData }}" hint-placeholder-val="{{ false }}">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: #0B9E76; flex-shrink: 0;"></div>
+              </sc-if>
+            </div>
+            <div style="font-size: 11.5px; color: #9088AE; margin-bottom: 10px; min-height: 15px;">{{ m.summaryLine }}</div>
+
+            <sc-if value="{{ m.hasSheetLink }}" hint-placeholder-val="{{ false }}">
+              <a href="{{ m.sheetLink }}" target="_blank" rel="noopener" style="display: block; font-size: 12px; color: #6D5AE0; font-weight: 700; text-decoration: none; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Buka Google Sheet ↗</a>
+            </sc-if>
+            <button onClick="{{ m.onSetLink }}" style="width: 100%; text-align: left; background: none; border: 1px dashed #DCD4F7; border-radius: 8px; padding: 6px 10px; font-size: 11.5px; color: #9088AE; cursor: pointer; margin-bottom: 8px;">{{ m.linkBtnLabel }}</button>
+
+            <label style="display: block; text-align: center; background: linear-gradient(120deg, #6D5AE0, #8A5CF0); color: #fff; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; font-weight: 700; cursor: pointer;">
+              Muat naik .xlsx
+              <input type="file" accept=".xlsx" onChange="{{ m.onFileSelected }}" style="display: none;"/>
+            </label>
+          </div>
+        </sc-for>
+      </div>
+
+      <sc-if value="{{ parsing }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top: 14px; font-size: 13px; color: #5F5578;">Membaca fail {{ fileName }}…</div>
+      </sc-if>
+      <sc-if value="{{ parseError }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top: 14px; background: #FDECF1; border: 1px solid #F5C2D6; color: #A61E4D; font-size: 13px; padding: 10px 14px; border-radius: 8px;">{{ parseError }}</div>
+      </sc-if>
+    </div>
+
+    <!-- Step 2: Preview -->
+    <sc-if value="{{ hasGroups }}" hint-placeholder-val="{{ false }}">
+      <div style="background: #fff; border: 1px solid #EAE5FA; border-radius: 14px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(32,20,80,0.05);">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; flex-wrap: wrap; gap: 10px;">
+          <div style="font-size: 12.5px; color: #5F5578; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;">Langkah 2 — Semak &amp; sahkan · {{ activeMonthLabel }} ({{ totalDetected }} murid dikesan)</div>
+          <div style="font-size: 12.5px; color: #9088AE;">Baris bertona kuning perlu disemak (jantina/kaum tidak dikesan)</div>
+        </div>
+
+        <sc-for list="{{ groups }}" as="group" hint-placeholder-count="2">
+          <div style="border: 1px solid #F0EDFB; border-radius: 10px; padding: 14px 16px; margin-top: 14px;">
+            <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px;">
+              <input type="text" value="{{ group.kelas }}" onChange="{{ group.onKelasChange }}" style="font-weight: 700; font-size: 14px; color: #131519; border: 1px solid #DCD4F7; border-radius: 8px; padding: 6px 10px; min-width: 160px;"/>
+              <select value="{{ group.tingkatan }}" onChange="{{ group.onTingkatanChange }}" style="padding: 6px 10px; border-radius: 8px; border: 1px solid #DCD4F7; font-size: 12.5px; background: {{ group.tingkatanBg }};">
+                <option value="">Tingkatan?</option>
+                <option value="PERALIHAN">Peralihan</option>
+                <option value="1">Tingkatan 1</option>
+                <option value="2">Tingkatan 2</option>
+                <option value="3">Tingkatan 3</option>
+                <option value="4">Tingkatan 4</option>
+                <option value="5">Tingkatan 5</option>
+                <option value="PPKI">PPKI</option>
+              </select>
+              <div style="font-size: 12.5px; color: #9088AE;">{{ group.count }} murid</div>
+              <button onClick="{{ group.onAddRow }}" style="margin-left: auto; background: none; border: 1px solid #DCD4F7; border-radius: 8px; color: #6D5AE0; font-size: 12px; font-weight: 700; cursor: pointer; padding: 6px 10px;">+ Tambah baris</button>
+              <button onClick="{{ group.onRemoveGroup }}" style="background: none; border: 1px solid #F5C2D6; border-radius: 8px; color: #C0362E; font-size: 12px; font-weight: 700; cursor: pointer; padding: 6px 10px;">Buang kelas ini</button>
+            </div>
+
+            <div style="overflow-x: auto;">
+              <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                <thead>
+                  <tr style="border-bottom: 1px solid #F0EDFB;">
+                    <th style="text-align: left; padding: 6px 8px; color: #9088AE; font-weight: 700; font-size: 11px; text-transform: uppercase;">Nama</th>
+                    <th style="text-align: left; padding: 6px 8px; color: #9088AE; font-weight: 700; font-size: 11px; text-transform: uppercase;">Jantina</th>
+                    <th style="text-align: left; padding: 6px 8px; color: #9088AE; font-weight: 700; font-size: 11px; text-transform: uppercase;">Kaum</th>
+                    <th style="text-align: left; padding: 6px 8px; color: #9088AE; font-weight: 700; font-size: 11px; text-transform: uppercase;">MBWN</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ group.rows }}" as="row" hint-placeholder-count="3">
+                    <tr style="background: {{ row.rowBg }}; border-bottom: 1px solid #F8F6FE;">
+                      <td style="padding: 6px 8px;"><input type="text" value="{{ row.nama }}" onChange="{{ row.onNamaChange }}" style="width: 100%; min-width: 200px; padding: 6px 8px; border-radius: 6px; border: 1px solid #DCD4F7; font-size: 13px;"/></td>
+                      <td style="padding: 6px 8px;">
+                        <select value="{{ row.jantina }}" onChange="{{ row.onJantinaChange }}" style="padding: 6px 8px; border-radius: 6px; border: 1px solid #DCD4F7; font-size: 13px;">
+                          <option value="">?</option>
+                          <option value="L">Lelaki</option>
+                          <option value="P">Perempuan</option>
+                        </select>
+                      </td>
+                      <td style="padding: 6px 8px;">
+                        <select value="{{ row.kaum }}" onChange="{{ row.onKaumChange }}" style="padding: 6px 8px; border-radius: 6px; border: 1px solid #DCD4F7; font-size: 13px;">
+                          <option value="">?</option>
+                          <option value="Melayu">Melayu</option>
+                          <option value="Cina">Cina</option>
+                          <option value="India">India</option>
+                          <option value="Lain-lain">Lain-lain</option>
+                        </select>
+                      </td>
+                      <td style="padding: 6px 8px;"><input type="checkbox" checked="{{ row.mbwn }}" onChange="{{ row.onMbwnChange }}"/></td>
+                      <td style="padding: 6px 8px;"><button onClick="{{ row.onRemove }}" style="background: none; border: none; color: #C0362E; cursor: pointer; font-size: 16px; line-height: 1;">×</button></td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </sc-for>
+
+        <div style="display: flex; align-items: center; gap: 12px; margin-top: 18px;">
+          <button onClick="{{ onSave }}" style="background: linear-gradient(120deg, #6D5AE0, #8A5CF0); color: #fff; border: none; border-radius: 999px; padding: 11px 24px; font-size: 13.5px; font-weight: 700; cursor: pointer;">Sahkan &amp; Simpan untuk {{ activeMonthLabel }}</button>
+          <button onClick="{{ onDiscard }}" style="background: none; border: 1px solid #DCD4F7; border-radius: 999px; padding: 11px 20px; font-size: 13.5px; font-weight: 700; color: #5F5578; cursor: pointer;">Buang pratonton</button>
+          <sc-if value="{{ saveMissingTingkatan }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size: 12.5px; color: #C0362E; font-weight: 700;">Sila pilih Tingkatan untuk semua kelas dahulu.</div>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ saveSuccess }}" hint-placeholder-val="{{ false }}">
+      <div style="background: #EAF7EF; border: 1px solid #B9E6C9; color: #0B7A3C; border-radius: 10px; padding: 12px 16px; font-size: 13px; font-weight: 700; margin-bottom: 20px;">Data untuk {{ savedMonthLabel }} disimpan. Buka <a href="./Dashboard.dc.html" style="color:#0B7A3C; text-decoration: underline;">Dashboard</a> untuk lihat kemas kini.</div>
+    </sc-if>
+
+    <!-- Existing overrides -->
+    <div style="background: #fff; border: 1px solid #EAE5FA; border-radius: 14px; padding: 20px; box-shadow: 0 2px 10px rgba(32,20,80,0.05);">
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+        <div style="font-size: 12.5px; color: #5F5578; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;">Data yang telah dimuat naik</div>
+        <sc-if value="{{ hasOverrides }}" hint-placeholder-val="{{ false }}">
+          <div style="display: flex; gap: 8px;">
+            <button onClick="{{ onExportCsv }}" style="background: none; border: 1px solid #DCD4F7; border-radius: 8px; color: #6D5AE0; font-size: 12px; font-weight: 700; cursor: pointer; padding: 6px 10px;">Eksport CSV</button>
+            <button onClick="{{ onClearAll }}" style="background: none; border: 1px solid #F5C2D6; border-radius: 8px; color: #C0362E; font-size: 12px; font-weight: 700; cursor: pointer; padding: 6px 10px;">Padam semua</button>
+          </div>
+        </sc-if>
+      </div>
+      <sc-if value="{{ hasOverrides }}" hint-placeholder-val="{{ false }}">
+        <sc-for list="{{ overridesList }}" as="ov" hint-placeholder-count="2">
+          <div style="display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid #F8F6FE;">
+            <div style="font-weight: 700; font-size: 12px; color: #6D5AE0; min-width: 80px;">{{ ov.monthLabel }}</div>
+            <div style="font-weight: 700; font-size: 13px; color: #131519; min-width: 140px;">{{ ov.kelas }}</div>
+            <div style="font-size: 12.5px; color: #9088AE; flex: 1;">{{ ov.tingkatanLabel }} · {{ ov.count }} murid · dimuat naik {{ ov.savedAtLabel }}</div>
+            <button onClick="{{ ov.onDelete }}" style="background: none; border: 1px solid #DCD4F7; border-radius: 8px; color: #5F5578; font-size: 12px; font-weight: 700; cursor: pointer; padding: 5px 9px;">Padam</button>
+          </div>
+        </sc-for>
+      </sc-if>
+      <sc-if value="{{ hasOverrides }}" hint-placeholder-val="{{ true }}">
+      </sc-if>
+      <div style="{{ noOverridesStyle }}">Tiada data upload lagi — Dashboard menggunakan data contoh sedia ada.</div>
+    </div>
+
+    <!-- iDME upload per bulan -->
+    <div style="background: #fff; border: 1px solid #EAE5FA; border-radius: 14px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 10px rgba(32,20,80,0.05);">
+      <div style="font-size: 12.5px; color: #5F5578; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 4px;">Muat naik fail iDME ikut bulan (pilihan)</div>
+      <div style="font-size: 12.5px; color: #9088AE; margin-bottom: 16px;">Muat naik eksport rasmi iDME ("SENARAI KESELURUHAN MURID") bagi setiap bulan untuk isi automatik Perbandingan iDME di Dashboard.</div>
+
+      <sc-if value="{{ idmeParseError }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-bottom: 14px; background: #FDECF1; border: 1px solid #F5C2D6; color: #A61E4D; font-size: 13px; padding: 10px 14px; border-radius: 8px;">{{ idmeParseError }}</div>
+      </sc-if>
+
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">
+        <sc-for list="{{ idmeMonths }}" as="m" hint-placeholder-count="12">
+          <div style="border: 1px solid #EAE5FA; border-radius: 12px; padding: 14px 16px; background: #fff;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+              <div style="font-family: 'Google Sans', 'Manrope', sans-serif; font-weight: 800; font-size: 15px; color: #131519;">{{ m.label }}</div>
+              <sc-if value="{{ m.hasData }}" hint-placeholder-val="{{ false }}">
+                <div style="width: 8px; height: 8px; border-radius: 50%; background: #0B9E76; flex-shrink: 0;"></div>
+              </sc-if>
+            </div>
+            <div style="font-size: 11.5px; color: #9088AE; margin-bottom: 10px; min-height: 15px;">{{ m.summaryLine }}</div>
+            <label style="display: block; text-align: center; background: linear-gradient(120deg, #6D5AE0, #8A5CF0); color: #fff; border-radius: 8px; padding: 8px 10px; font-size: 12.5px; font-weight: 700; cursor: pointer;">
+              Muat naik .xlsx
+              <input type="file" accept=".xlsx" onChange="{{ m.onFileSelected }}" style="display: none;"/>
+            </label>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  MONTHS = [
+    { code: '01', label: 'Januari' },
+    { code: '02', label: 'Februari' },
+    { code: '03', label: 'Mac' },
+    { code: '04', label: 'April' },
+    { code: '05', label: 'Mei' },
+    { code: '06', label: 'Jun' },
+    { code: '07', label: 'Julai' },
+    { code: '08', label: 'Ogos' },
+    { code: '09', label: 'September' },
+    { code: '10', label: 'Oktober' },
+    { code: '11', label: 'November' },
+    { code: '12', label: 'Disember' },
+  ];
+
+  state = {
+    activeMonth: '',
+    groups: [],
+    fileName: '',
+    parsing: false,
+    parseError: '',
+    saveSuccess: false,
+    savedMonth: '',
+    overridesByMonth: {},
+    sheetLinks: {},
+    idmeByMonth: {},
+    idmeParseError: '',
+  };
+
+  OVERRIDES_KEY = 'uploaded-students-v2';
+  OVERRIDES_KEY_LEGACY = 'uploaded-students-v1';
+  LINKS_KEY = 'month-sheet-links-v1';
+  IDME_STORAGE_KEY = 'idme-comparison-v1';
+
+  componentDidMount() {
+    this.setState({ overridesByMonth: this.loadOverridesByMonth(), sheetLinks: this.loadSheetLinks(), idmeByMonth: this.loadIdmeByMonth() });
+  }
+
+  loadOverridesByMonth() {
+    try {
+      const raw = localStorage.getItem(this.OVERRIDES_KEY);
+      if (raw) return JSON.parse(raw);
+      const legacy = localStorage.getItem(this.OVERRIDES_KEY_LEGACY);
+      if (legacy) {
+        const data = JSON.parse(legacy);
+        if (data && Object.keys(data).length) return { '04': data };
+      }
+    } catch (e) {}
+    return {};
+  }
+
+  saveOverridesByMonth(overridesByMonth) {
+    try {
+      localStorage.setItem(this.OVERRIDES_KEY, JSON.stringify(overridesByMonth));
+    } catch (e) {}
+    this.setState({ overridesByMonth });
+  }
+
+  loadSheetLinks() {
+    try {
+      const raw = localStorage.getItem(this.LINKS_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  saveSheetLinks(sheetLinks) {
+    try {
+      localStorage.setItem(this.LINKS_KEY, JSON.stringify(sheetLinks));
+    } catch (e) {}
+    this.setState({ sheetLinks });
+  }
+
+  onSetLink = (monthCode, monthLabel) => {
+    const current = this.state.sheetLinks[monthCode] || '';
+    const url = window.prompt('Tampal pautan Google Sheet untuk ' + monthLabel + ':', current);
+    if (url === null) return;
+    const sheetLinks = { ...this.state.sheetLinks };
+    if (url.trim()) sheetLinks[monthCode] = url.trim();
+    else delete sheetLinks[monthCode];
+    this.saveSheetLinks(sheetLinks);
+  };
+
+  loadIdmeByMonth() {
+    try {
+      const raw = localStorage.getItem(this.IDME_STORAGE_KEY);
+      return raw ? JSON.parse(raw) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  saveIdmeForMonth(month, idme, idmeNotes) {
+    try {
+      const savedAt = new Date().toISOString();
+      const idmeByMonth = { ...this.state.idmeByMonth, [month]: { idme, idmeNotes: idmeNotes || {}, savedAt } };
+      localStorage.setItem(this.IDME_STORAGE_KEY, JSON.stringify(idmeByMonth));
+      this.setState({ idmeByMonth });
+    } catch (e) {}
+  }
+
+  normHeader(cell) {
+    return (cell || '').toString().trim().toUpperCase().replace(/\s*\/\s*/g, '/').replace(/\s+/g, ' ');
+  }
+
+  deriveIdmeTingkatan(raw, aliran, jenisKelas) {
+    const t = (raw || '').toString().trim().toUpperCase();
+    const a = (aliran || '').toString().toUpperCase();
+    const j = (jenisKelas || '').toString().toUpperCase();
+    if (t === 'PPKI' || /KHAS/.test(a) || /KHAS/.test(j)) return 'PPKI';
+    if (t.startsWith('PERALIHAN')) return 'PERALIHAN';
+    const m = t.match(/(\d)/);
+    if (m) return m[1];
+    return '';
+  }
+
+  computeIdmeCountsFromSheets(sheets) {
+    const tingkatanOrder = ['PERALIHAN', '1', '2', '3', '4', '5', 'PPKI'];
+    const counts = {};
+    tingkatanOrder.forEach((t) => { counts[t] = 0; });
+    let found = false;
+    for (const rows of Object.values(sheets)) {
+      let headerRowIdx = -1;
+      let tingkatanCol = -1, aliranCol = -1, jenisKelasCol = -1;
+      for (let r = 0; r < rows.length; r++) {
+        const row = rows[r] || [];
+        let hasName = false;
+        for (let c = 0; c < row.length; c++) {
+          if (this.normHeader(row[c]) === 'NAMA') hasName = true;
+        }
+        if (hasName) {
+          headerRowIdx = r;
+          for (let c = 0; c < row.length; c++) {
+            const h = this.normHeader(row[c]);
+            if (h === 'TAHUN/TINGKATAN') tingkatanCol = c;
+            if (h === 'KETERANGAN ALIRAN') aliranCol = c;
+            if (h === 'JENIS KELAS') jenisKelasCol = c;
+          }
+          break;
+        }
+      }
+      if (headerRowIdx === -1 || tingkatanCol === -1) continue;
+      found = true;
+      for (let r = headerRowIdx + 1; r < rows.length; r++) {
+        const row = rows[r] || [];
+        const raw = row[tingkatanCol];
+        if (!raw) continue;
+        const t = this.deriveIdmeTingkatan(raw, aliranCol >= 0 ? row[aliranCol] : '', jenisKelasCol >= 0 ? row[jenisKelasCol] : '');
+        if (t && counts[t] !== undefined) counts[t]++;
+      }
+    }
+    return found ? counts : null;
+  }
+
+  onIdmeFileSelected = async (monthCode, e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    this.setState({ idmeParseError: '' });
+    try {
+      const sheets = await this.loadWorkbook(file);
+      const counts = this.computeIdmeCountsFromSheets(sheets);
+      if (!counts) {
+        this.setState({ idmeParseError: 'Tiada lajur "TAHUN / TINGKATAN" dikesan dalam fail ini. Sila semak format fail iDME.' });
+        return;
+      }
+      const existingNotes = (this.state.idmeByMonth[monthCode] || {}).idmeNotes || {};
+      this.saveIdmeForMonth(monthCode, counts, existingNotes);
+      this.setState({ idmeParseError: '' });
+    } catch (err) {
+      this.setState({ idmeParseError: 'Ralat membaca fail: ' + err.message });
+    }
+  };
+
+  // ---------- XLSX parsing (client-side, no deps) ----------
+
+  async unzip(blob) {
+    const buf = new Uint8Array(await blob.arrayBuffer());
+    const dv = new DataView(buf.buffer);
+    let eocd = -1;
+    for (let i = buf.length - 22; i >= 0; i--) {
+      if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+    }
+    if (eocd < 0) throw new Error('Fail bukan format .xlsx yang sah.');
+    const cdOffset = dv.getUint32(eocd + 16, true);
+    const cdCount = dv.getUint16(eocd + 10, true);
+    let p = cdOffset;
+    const entries = {};
+    for (let i = 0; i < cdCount; i++) {
+      const method = dv.getUint16(p + 10, true);
+      const compSize = dv.getUint32(p + 20, true);
+      const nameLen = dv.getUint16(p + 28, true);
+      const extraLen = dv.getUint16(p + 30, true);
+      const commentLen = dv.getUint16(p + 32, true);
+      const lhOffset = dv.getUint32(p + 42, true);
+      const name = new TextDecoder().decode(buf.slice(p + 46, p + 46 + nameLen));
+      entries[name] = { method, compSize, lhOffset };
+      p += 46 + nameLen + extraLen + commentLen;
+    }
+    const result = {};
+    for (const [name, e] of Object.entries(entries)) {
+      const lp = e.lhOffset;
+      const lNameLen = dv.getUint16(lp + 26, true);
+      const lExtraLen = dv.getUint16(lp + 28, true);
+      const dataStart = lp + 30 + lNameLen + lExtraLen;
+      const compData = buf.slice(dataStart, dataStart + e.compSize);
+      let outData;
+      if (e.method === 0) {
+        outData = compData;
+      } else if (e.method === 8) {
+        const ds = new DecompressionStream('deflate-raw');
+        const writer = ds.writable.getWriter();
+        writer.write(compData);
+        writer.close();
+        const chunks = [];
+        const reader = ds.readable.getReader();
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+        }
+        const total = chunks.reduce((a, c) => a + c.length, 0);
+        outData = new Uint8Array(total);
+        let off = 0;
+        for (const c of chunks) { outData.set(c, off); off += c.length; }
+      } else {
+        continue;
+      }
+      result[name] = outData;
+    }
+    return result;
+  }
+
+  colToIndex(col) {
+    let n = 0;
+    for (let i = 0; i < col.length; i++) n = n * 26 + (col.charCodeAt(i) - 64);
+    return n - 1;
+  }
+
+  parseSheetXml(xmlStr, sharedStrings) {
+    const doc = new DOMParser().parseFromString(xmlStr, 'text/xml');
+    const rows = [];
+    const rowEls = doc.getElementsByTagName('row');
+    for (const rowEl of rowEls) {
+      const rIdx = parseInt(rowEl.getAttribute('r'), 10) - 1;
+      const cells = rowEl.getElementsByTagName('c');
+      const row = [];
+      for (const c of cells) {
+        const ref = c.getAttribute('r');
+        const colLetters = ref.match(/[A-Z]+/)[0];
+        const idx = this.colToIndex(colLetters);
+        const t = c.getAttribute('t');
+        const vEl = c.getElementsByTagName('v')[0];
+        let val = vEl ? vEl.textContent : '';
+        if (t === 's') {
+          val = sharedStrings[parseInt(val, 10)] || '';
+        } else if (t === 'inlineStr') {
+          const isEl = c.getElementsByTagName('is')[0];
+          val = isEl ? isEl.textContent : '';
+        }
+        row[idx] = val;
+      }
+      rows[rIdx] = row;
+    }
+    return rows;
+  }
+
+  parseSharedStrings(xmlStr) {
+    if (!xmlStr) return [];
+    const doc = new DOMParser().parseFromString(xmlStr, 'text/xml');
+    const siEls = doc.getElementsByTagName('si');
+    const arr = [];
+    for (const si of siEls) {
+      const tEls = si.getElementsByTagName('t');
+      let text = '';
+      for (const t of tEls) text += t.textContent;
+      arr.push(text);
+    }
+    return arr;
+  }
+
+  parseWorkbookRels(xmlStr) {
+    const doc = new DOMParser().parseFromString(xmlStr, 'text/xml');
+    const rels = doc.getElementsByTagName('Relationship');
+    const map = {};
+    for (const r of rels) map[r.getAttribute('Id')] = r.getAttribute('Target');
+    return map;
+  }
+
+  parseWorkbookSheetRIds(xmlStr) {
+    const doc = new DOMParser().parseFromString(xmlStr, 'text/xml');
+    const sheetEls = doc.getElementsByTagName('sheet');
+    return Array.from(sheetEls).map((s) => ({ name: s.getAttribute('name'), rid: s.getAttribute('r:id') }));
+  }
+
+  async loadWorkbook(blob) {
+    const zip = await this.unzip(blob);
+    const dec = new TextDecoder();
+    const sstXml = zip['xl/sharedStrings.xml'] ? dec.decode(zip['xl/sharedStrings.xml']) : '';
+    const sst = this.parseSharedStrings(sstXml);
+    const wbXml = dec.decode(zip['xl/workbook.xml']);
+    const relsXml = dec.decode(zip['xl/_rels/workbook.xml.rels']);
+    const sheetMeta = this.parseWorkbookSheetRIds(wbXml);
+    const relMap = this.parseWorkbookRels(relsXml);
+    const sheets = {};
+    for (const { name, rid } of sheetMeta) {
+      const target = relMap[rid];
+      const fullPath = 'xl/' + target;
+      if (!zip[fullPath]) continue;
+      const xml = dec.decode(zip[fullPath]);
+      sheets[name] = this.parseSheetXml(xml, sst);
+    }
+    return sheets;
+  }
+
+  deriveTingkatan(kelas) {
+    const k = (kelas || '').toUpperCase();
+    if (k.startsWith('PERALIHAN')) return { tingkatan: 'PERALIHAN', ppki: false };
+    const m = k.match(/^(\d)/);
+    if (m) return { tingkatan: m[1], ppki: false };
+    const ppkiKeywords = ['WAWASAN', 'GEMILANG', 'CEMERLANG', 'TUNAS', 'HARAPAN', 'AZAM', 'CEKAL', 'KSSM', 'KR '];
+    if (ppkiKeywords.some((kw) => k.includes(kw))) return { tingkatan: 'PPKI', ppki: true };
+    return { tingkatan: '', ppki: false };
+  }
+
+  extractCandidates(sheets) {
+    const groupsMap = {};
+    for (const [sheetName, sheetRows] of Object.entries(sheets)) {
+      if (/^SEMUA|^KESELURUHAN|^JUMLAH|^ANALISIS|^SENARAI (HARI|TEMPAHAN|PASM)|^YURAN|^inklusif/i.test(sheetName.trim())) {
+        // still allow KESELURUHAN sheets that contain "NAMA PELAJAR" lists — checked generically below
+      }
+      let headerRowIdx = -1;
+      let nameCol = -1;
+      let lpCol = -1;
+      let jantinaCol = -1;
+      let bangsaCol = -1;
+      let kelasCol = -1;
+      for (let r = 0; r < sheetRows.length; r++) {
+        const row = sheetRows[r] || [];
+        let foundName = -1;
+        for (let c = 0; c < row.length; c++) {
+          const cell = (row[c] || '').toString().trim().toUpperCase();
+          if (cell === 'NAMA' || cell === 'NAMA PELAJAR' || cell === 'NAMA MURID') foundName = c;
+        }
+        if (foundName >= 0) {
+          headerRowIdx = r;
+          nameCol = foundName;
+          for (let c = 0; c < row.length; c++) {
+            const cell = (row[c] || '').toString().trim().toUpperCase();
+            if (cell === 'L/P') lpCol = c;
+            if (cell === 'JANTINA') jantinaCol = c;
+            if (cell === 'BANGSA' || cell === 'KAUM') bangsaCol = c;
+            if (cell === 'KELAS') kelasCol = c;
+          }
+          break;
+        }
+      }
+      if (headerRowIdx === -1) continue;
+      let defaultKelas = sheetName.replace(/\/?\s*20\d\d/g, '').replace(/\s+/g, ' ').trim();
+      for (let r = headerRowIdx + 1; r < sheetRows.length; r++) {
+        const row = sheetRows[r] || [];
+        const nama = (row[nameCol] || '').toString().trim();
+        if (!nama || /^BIL/i.test(nama)) continue;
+        let jantina = '';
+        let kaum = '';
+        if (lpCol >= 0) {
+          const code = (row[lpCol] || '').toString().trim().toUpperCase();
+          if (code.length >= 1 && (code[0] === 'L' || code[0] === 'P')) jantina = code[0];
+          if (code.length >= 2) {
+            const kc = code[1];
+            kaum = kc === 'M' ? 'Melayu' : kc === 'C' ? 'Cina' : kc === 'I' ? 'India' : kc === 'L' ? 'Lain-lain' : '';
+          }
+        }
+        if (jantinaCol >= 0) {
+          const v = (row[jantinaCol] || '').toString().trim().toUpperCase();
+          if (v === 'L' || v === 'P') jantina = v;
+        }
+        if (bangsaCol >= 0) {
+          const v = (row[bangsaCol] || '').toString().trim();
+          if (/melayu/i.test(v)) kaum = 'Melayu';
+          else if (/cina/i.test(v)) kaum = 'Cina';
+          else if (/india/i.test(v)) kaum = 'India';
+          else if (v) kaum = 'Lain-lain';
+        }
+        let kelasForRow = defaultKelas;
+        if (kelasCol >= 0) {
+          const v = (row[kelasCol] || '').toString().trim();
+          if (v) kelasForRow = v;
+        }
+        const key = kelasForRow;
+        if (!groupsMap[key]) {
+          const derived = this.deriveTingkatan(key);
+          groupsMap[key] = { kelas: key, tingkatan: derived.tingkatan, ppki: derived.ppki, rows: [] };
+        }
+        groupsMap[key].rows.push({ nama, jantina, kaum, mbwn: false });
+      }
+    }
+    return Object.values(groupsMap);
+  }
+
+  onFileSelected = async (monthCode, e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    this.setState({ parsing: true, parseError: '', fileName: file.name, saveSuccess: false, activeMonth: monthCode });
+    try {
+      const sheets = await this.loadWorkbook(file);
+      const groups = this.extractCandidates(sheets);
+      if (!groups.length) {
+        this.setState({ parsing: false, parseError: 'Tiada senarai nama murid dikesan dalam fail ini. Sila semak format fail.', groups: [] });
+        return;
+      }
+      groups.forEach((g) => {
+        g.rows = g.rows.map((r, i) => ({ ...r, _id: g.kelas + '-' + i + '-' + Date.now() }));
+      });
+      this.setState({ parsing: false, groups, parseError: '' });
+    } catch (err) {
+      this.setState({ parsing: false, parseError: 'Ralat membaca fail: ' + err.message, groups: [] });
+    }
+  };
+
+  updateGroup(kelasKey, fn) {
+    this.setState((s) => ({
+      groups: s.groups.map((g) => (g.kelas === kelasKey ? fn(g) : g)),
+    }));
+  }
+
+  updateRow(kelasKey, rowId, fn) {
+    this.updateGroup(kelasKey, (g) => ({ ...g, rows: g.rows.map((r) => (r._id === rowId ? fn(r) : r)) }));
+  }
+
+  onDiscard = () => this.setState({ groups: [], fileName: '', parseError: '', saveSuccess: false, activeMonth: '' });
+
+  onSave = () => {
+    const { groups, activeMonth } = this.state;
+    if (!activeMonth) return;
+    if (groups.some((g) => !g.tingkatan)) {
+      this.setState({ saveMissingTingkatan: true });
+      return;
+    }
+    const overridesByMonth = { ...this.state.overridesByMonth };
+    const monthOverrides = { ...(overridesByMonth[activeMonth] || {}) };
+    const savedAt = new Date().toISOString();
+    groups.forEach((g) => {
+      monthOverrides[g.kelas] = {
+        tingkatan: g.tingkatan,
+        ppki: g.ppki || g.tingkatan === 'PPKI',
+        savedAt,
+        students: g.rows.filter((r) => r.nama.trim()).map((r) => ({
+          nama: r.nama.trim(),
+          jantina: r.jantina || 'L',
+          kaum: r.kaum || 'Melayu',
+          mbwn: !!r.mbwn,
+        })),
+      };
+    });
+    overridesByMonth[activeMonth] = monthOverrides;
+    this.saveOverridesByMonth(overridesByMonth);
+    this.setState({ groups: [], fileName: '', saveSuccess: true, savedMonth: activeMonth, saveMissingTingkatan: false, activeMonth: '' });
+  };
+
+  onClearAll = () => this.saveOverridesByMonth({});
+
+  csvEscape(val) {
+    const s = (val === undefined || val === null) ? '' : String(val);
+    if (/[",\n]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+
+  onExportCsv = () => {
+    const tingkatanLabels = { PERALIHAN: 'Peralihan', '1': 'Tingkatan 1', '2': 'Tingkatan 2', '3': 'Tingkatan 3', '4': 'Tingkatan 4', '5': 'Tingkatan 5', PPKI: 'PPKI' };
+    const monthLabelOf = (code) => (this.MONTHS.find((m) => m.code === code) || {}).label || code;
+    const rows = [['Bulan', 'Nama', 'Kelas', 'Tingkatan', 'Jantina', 'Kaum', 'MBWN']];
+    Object.entries(this.state.overridesByMonth).forEach(([monthCode, overrides]) => {
+      Object.entries(overrides).forEach(([kelas, ov]) => {
+        (ov.students || []).forEach((st) => {
+          rows.push([
+            monthLabelOf(monthCode),
+            st.nama,
+            kelas,
+            tingkatanLabels[ov.tingkatan] || ov.tingkatan || '',
+            st.jantina === 'P' ? 'Perempuan' : 'Lelaki',
+            st.kaum,
+            st.mbwn ? 'Ya' : 'Tidak',
+          ]);
+        });
+      });
+    });
+    const csv = rows.map((r) => r.map((v) => this.csvEscape(v)).join(',')).join('\r\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `data-murid-upload-${stamp}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  deleteOverride = (monthCode, kelas) => {
+    const overridesByMonth = { ...this.state.overridesByMonth };
+    const monthOverrides = { ...(overridesByMonth[monthCode] || {}) };
+    delete monthOverrides[kelas];
+    if (Object.keys(monthOverrides).length) overridesByMonth[monthCode] = monthOverrides;
+    else delete overridesByMonth[monthCode];
+    this.saveOverridesByMonth(overridesByMonth);
+  };
+
+  renderVals() {
+    const tingkatanLabels = { PERALIHAN: 'Peralihan', '1': 'Ting 1', '2': 'Ting 2', '3': 'Ting 3', '4': 'Ting 4', '5': 'Ting 5', PPKI: 'PPKI' };
+
+    const months = this.MONTHS.map((m) => {
+      const overrides = this.state.overridesByMonth[m.code] || {};
+      const kelasCount = Object.keys(overrides).length;
+      const studentCount = Object.values(overrides).reduce((a, ov) => a + (ov.students || []).length, 0);
+      const latestSavedAt = Object.values(overrides).reduce((max, ov) => (ov.savedAt && ov.savedAt > max ? ov.savedAt : max), '');
+      const sheetLink = this.state.sheetLinks[m.code] || '';
+      const isActive = this.state.activeMonth === m.code && this.state.groups.length > 0;
+      return {
+        code: m.code,
+        label: m.label,
+        hasData: studentCount > 0,
+        summaryLine: studentCount > 0
+          ? `${studentCount} murid · ${kelasCount} kelas${latestSavedAt ? ' · ' + new Date(latestSavedAt).toLocaleDateString('ms-MY', { day: 'numeric', month: 'short' }) : ''}`
+          : 'Tiada data lagi',
+        hasSheetLink: !!sheetLink,
+        sheetLink,
+        linkBtnLabel: sheetLink ? 'Tukar pautan Google Sheet' : '+ Tambah pautan Google Sheet',
+        onSetLink: () => this.onSetLink(m.code, m.label),
+        onFileSelected: (e) => this.onFileSelected(m.code, e),
+        cardBorder: isActive ? '#6D5AE0' : '#EAE5FA',
+        cardBg: isActive ? '#F8F6FE' : '#fff',
+      };
+    });
+
+    const activeMonthLabel = (this.MONTHS.find((m) => m.code === this.state.activeMonth) || {}).label || '';
+    const savedMonthLabel = (this.MONTHS.find((m) => m.code === this.state.savedMonth) || {}).label || '';
+
+    const idmeTingkatanLabels = { PERALIHAN: 'Peralihan', '1': 'Ting 1', '2': 'Ting 2', '3': 'Ting 3', '4': 'Ting 4', '5': 'Ting 5', PPKI: 'PPKI' };
+    const idmeMonths = this.MONTHS.map((m) => {
+      const entry = this.state.idmeByMonth[m.code];
+      const idme = entry && entry.idme ? entry.idme : null;
+      const total = idme ? Object.values(idme).reduce((a, v) => a + (v || 0), 0) : 0;
+      return {
+        code: m.code,
+        label: m.label,
+        hasData: !!idme,
+        summaryLine: idme
+          ? `${total} murid${entry.savedAt ? ' · ' + new Date(entry.savedAt).toLocaleDateString('ms-MY', { day: 'numeric', month: 'short' }) : ''}`
+          : 'Tiada data iDME lagi',
+        onFileSelected: (e) => this.onIdmeFileSelected(m.code, e),
+      };
+    });
+
+    const groups = this.state.groups.map((g) => ({
+      kelas: g.kelas,
+      tingkatan: g.tingkatan,
+      tingkatanBg: g.tingkatan ? '#fff' : '#FFFBEB',
+      count: g.rows.length,
+      onKelasChange: (e) => this.updateGroup(g.kelas, (grp) => ({ ...grp, kelas: e.target.value })),
+      onTingkatanChange: (e) => this.updateGroup(g.kelas, (grp) => ({ ...grp, tingkatan: e.target.value, ppki: e.target.value === 'PPKI' })),
+      onAddRow: () => this.updateGroup(g.kelas, (grp) => ({ ...grp, rows: [...grp.rows, { nama: '', jantina: '', kaum: '', mbwn: false, _id: g.kelas + '-new-' + Date.now() }] })),
+      onRemoveGroup: () => this.setState((s) => ({ groups: s.groups.filter((gg) => gg.kelas !== g.kelas) })),
+      rows: g.rows.map((r) => ({
+        ...r,
+        rowBg: (!r.jantina || !r.kaum) ? '#FFFBEB' : '#fff',
+        onNamaChange: (e) => this.updateRow(g.kelas, r._id, (rr) => ({ ...rr, nama: e.target.value })),
+        onJantinaChange: (e) => this.updateRow(g.kelas, r._id, (rr) => ({ ...rr, jantina: e.target.value })),
+        onKaumChange: (e) => this.updateRow(g.kelas, r._id, (rr) => ({ ...rr, kaum: e.target.value })),
+        onMbwnChange: (e) => this.updateRow(g.kelas, r._id, (rr) => ({ ...rr, mbwn: e.target.checked })),
+        onRemove: () => this.updateGroup(g.kelas, (grp) => ({ ...grp, rows: grp.rows.filter((rr) => rr._id !== r._id) })),
+      })),
+    }));
+
+    const totalDetected = groups.reduce((a, g) => a + g.count, 0);
+
+    const overridesList = [];
+    Object.entries(this.state.overridesByMonth).forEach(([monthCode, overrides]) => {
+      const monthLabel = (this.MONTHS.find((m) => m.code === monthCode) || {}).label || monthCode;
+      Object.entries(overrides).forEach(([kelas, ov]) => {
+        overridesList.push({
+          monthLabel,
+          kelas,
+          tingkatanLabel: tingkatanLabels[ov.tingkatan] || ov.tingkatan || '-',
+          count: (ov.students || []).length,
+          savedAtLabel: ov.savedAt ? new Date(ov.savedAt).toLocaleString('ms-MY', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '',
+          onDelete: () => this.deleteOverride(monthCode, kelas),
+        });
+      });
+    });
+    overridesList.sort((a, b) => (b.savedAtLabel || '').localeCompare(a.savedAtLabel || ''));
+
+    return {
+      months,
+      activeMonthLabel,
+      savedMonthLabel,
+      fileName: this.state.fileName,
+      parsing: this.state.parsing,
+      parseError: this.state.parseError,
+      hasGroups: groups.length > 0,
+      groups,
+      totalDetected,
+      onSave: this.onSave,
+      onDiscard: this.onDiscard,
+      saveMissingTingkatan: !!this.state.saveMissingTingkatan,
+      saveSuccess: !!this.state.saveSuccess,
+      hasOverrides: overridesList.length > 0,
+      overridesList,
+      noOverridesStyle: overridesList.length > 0 ? 'display:none;' : 'font-size: 13px; color: #9088AE; padding: 8px 0;',
+      onClearAll: this.onClearAll,
+      onExportCsv: this.onExportCsv,
+      idmeMonths,
+      idmeParseError: this.state.idmeParseError || '',
+    };
+  }
+}
+
+</script>
+</body>
+</html>
